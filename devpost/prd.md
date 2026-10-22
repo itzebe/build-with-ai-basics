@@ -33,7 +33,11 @@ One screen. No navigation, no modals, no separate routes.
 
 Top to bottom:
 
-- A short title and a one-line explanation. Deliberately brief — two sentences at most.
+- A short title and a two-sentence explanation. Deliberately brief, but it must carry the
+  one idea that makes the app more than a display: **the squares pass on their own**. "This
+  shows you how many are left" describes a calculation; it does not say the number moves
+  without you, which is the whole point. The lede states that the count runs down by itself,
+  whether or not the app is opened.
 - **A legend, teaching the three square states.** This is not decoration. A pale square, a
   green square and a dark square mean three different things, and none of them is guessable
   from looking. One row: a swatch and a word for each, plus a single line saying what tapping
