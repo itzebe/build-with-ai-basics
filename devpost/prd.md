@@ -23,7 +23,7 @@ Squares pass on their own. Tapping records presence rather than consuming anythi
 5. You tap a quiet square if you were there for it. It fills in dark and the kept count goes up. Tapping it again clears it — you are recording a fact, not spending anything.
 6. You tap **Add a ritual**. A small form appears: what it is, how often, how long the phase runs, and when it started.
 7. You save it. The new card appears with its own timeline, already partly elapsed if you said the phase began a while ago.
-8. You close the tab and come back next week. Your rituals are still there, your kept squares are still marked, and **one more square has gone quiet without you touching anything**.
+8. You close the tab and come back next week. Your rituals are still there, your kept squares are still marked, one more square has gone quiet without you touching anything, and the card tells you so: *"1 moment passed since you last looked."*
 
 Success is: a stranger opens the page, understands it in five seconds, and can tell you how many are left and when the next one is.
 
@@ -44,6 +44,7 @@ Each card, top to bottom:
 - Under it, a line of small text: the frequency and the end of the phase, phrased plainly.
 - **Two counts, side by side.** *Left* is the large, prominent one — how many are still to come. *Kept* is smaller and quieter — how many you recorded being there for. The visual weight is deliberate: the honest number is the one that moves on its own, and the one you control should not shout.
 - A short line naming the next occurrence: "Next: Saturday, 25 October." This is the only actionable thing on the card, so it is stated plainly rather than styled as a call to action.
+- **On return only**, a line saying what changed while you were away: "4 moments passed since you last looked." It appears once, the first time you open the app on a new day, and then the marker moves forward. It is not a notification and does not accumulate — if you reload twice in an afternoon it does not repeat.
 - The grid of squares, wrapping across as many rows as needed. Squares that have passed are visibly quieter than squares still to come.
 - A small, quiet way to remove a card.
 
@@ -81,6 +82,16 @@ The kernel, and the reason the app is useful rather than a one-time calculation.
 - This is derived from the clock every time the page is drawn. Nothing is stored about which squares have passed, so the app cannot drift out of date and does not need to run in the background.
 - The **Left** count is the number of future occurrences. It decreases on its own as days go by.
 - The grid therefore looks different every time the user returns, even if they changed nothing. That is the point.
+
+### Noticing the gap
+
+The reason to come back, and the difference between a tool and a one-time calculation.
+
+- Each ritual stores the date it was last looked at.
+- On opening, the app compares that date to today and counts how many occurrences fell in between.
+- If any did, the card says so in one quiet line, once.
+- The marker then moves to today, so the line does not repeat until real time has passed again.
+- This is the one thing the app says unprompted, and it is the honest version of a notification: it tells you what already happened rather than demanding you do something.
 
 ### Recording that you were there
 

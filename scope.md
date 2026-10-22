@@ -48,8 +48,11 @@ they have not happened yet.
 They tap a passed square when they were there for it. It fills in dark. That is not
 spending anything — it is keeping a record. The count of kept moments goes up.
 
-They come back because the number moved without them. It is the only thing that tells
-them the truth every week: **you have N left, and the next one is on Saturday.**
+They come back because the number moved without them, and because the app tells them so:
+on returning after a gap it says how many moments slipped by while they were away — *"4
+moments passed since you last looked."* That line exists nowhere else, and it is the only
+thing that tells them the truth every week: **you have N left, and the next one is on
+Saturday.**
 
 Two numbers per ritual, and the difference between them is the point:
 
@@ -109,6 +112,7 @@ In:
 - Tap a passed square to record that you were there; tap again to undo.
 - Two counts per ritual: still to come, and kept.
 - The next occurrence's date, so the app tells you something you can act on.
+- A note on return saying how many moments passed since you last looked.
 - Rituals and recorded moments persist in the browser between visits.
 
 Out: accounts, sharing, notifications, reminders, syncing, editing a ritual after it is created, calendars, statistics, export.

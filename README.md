@@ -16,6 +16,10 @@ You tap a quiet square when you were there for it. It fills in dark, and the kep
 count goes up. Tap it again to take it back; it is a note about the past, not the
 moment itself. The number is easy to ignore, but a grid you can watch run out is not.
 
+And when you come back after a while, the app tells you what changed while you were
+gone: *"4 moments passed since you last looked."* No other app says that. It is the
+reason to open it again.
+
 ## Who it is for
 
 Two people, really.
@@ -81,10 +85,16 @@ daylight-saving boundary drifts by an hour and can land an occurrence on the wro
 day. Month ends are clamped too, so starting on 31 January gives 31 Jan → 28 Feb →
 31 Mar, not a march into the wrong month.
 
-**Nothing about the present is stored.** Only the start date, the count, and which
-occurrences you marked. The passed/upcoming split is recomputed from your device's
-clock every time the page is drawn. That is why the grid can never be quietly out of
-date, and why there is no timer or background process anywhere in the app.
+**Nothing about the present is stored.** Only the start date, the count, which
+occurrences you marked, and the day you last opened the app. The passed/upcoming split
+is recomputed from your device's clock every time the page is drawn. That is why the
+grid can never be quietly out of date, and why there is no timer or background process
+anywhere in the app.
+
+The one stored date is `lastSeenISO`. It exists so the app can count what fell between
+your last visit and now, and then it moves forward. The count itself is never stored —
+it is a difference between two dates, not a fact about the ritual, and storing it would
+let it go stale in exactly the way the old counter did.
 
 ## Using it
 
@@ -95,8 +105,8 @@ date, and why there is no timer or background process anywhere in the app.
 3. Tap a quiet square if you were there for it. Tap again to undo.
 4. Use **Add a ritual** for your own: a name, how often, how long it lasts, and when
    it started.
-5. Come back next week. Your kept marks are still there, and one more square has gone
-   quiet on its own.
+5. Come back next week. Your kept marks are still there, one more square has gone quiet
+   on its own, and the card says how many moments slipped by.
 
 You cannot mark a square that has not happened yet. There is nothing to record.
 
@@ -154,7 +164,8 @@ to compute and is left out on purpose — it would turn a reflection tool into a
 source of guilt.
 
 There is no reminder or notification, so the app only tells you the truth on the
-days you choose to open it.
+days you choose to open it. The line about what passed while you were away is not a
+notification either — it waits for you, and it appears once rather than nagging.
 
 ## Licence
 

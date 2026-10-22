@@ -133,6 +133,16 @@ body {
   color: var(--ink-soft);
 }
 
+/* What slipped by since the user last looked. The payoff for coming back, so it
+   sits above the grid and carries a little more weight than the next-date line. */
+.card-slip {
+  margin: -0.55rem 0 1.1rem;
+  font-family: var(--serif);
+  font-size: .95rem;
+  font-style: italic;
+  color: var(--ink);
+}
+
 /* ---------- the grid ---------- */
 
 .grid {

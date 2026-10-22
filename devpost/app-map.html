@@ -120,6 +120,13 @@
       not the moment itself.
     </div>
     <div class="stop">
+      <b>app.js → <code>notePassage()</code></b><br>
+      Runs once at startup. Counts how many occurrences fell between the day you last
+      looked and today, so the card can say what slipped by. The count is transient — a
+      difference between two dates rather than a fact about the ritual, and storing it
+      would let it go stale. That is why the old <code>spent</code> counter had to go.
+    </div>
+    <div class="stop">
       <b>app.js → <code>save()</code> and <code>load()</code></b><br>
       <code>load()</code> validates every record with <code>isUsableRitual()</code> and
       throws away anything malformed, so bad data can never reach the screen as
@@ -145,6 +152,7 @@
     <tr><td class="mono">startISO</td><td>When the phase began. The timeline runs from here.</td></tr>
     <tr><td class="mono">total</td><td>Worked out once when created, then never recomputed.</td></tr>
     <tr><td class="mono">kept</td><td>Indices of the occurrences you recorded being there for.</td></tr>
+    <tr><td class="mono">lastSeenISO</td><td>The day you last opened the app. Used only to count what slipped by.</td></tr>
   </table>
   <p>There is no <code>remaining</code> field, and no <code>passed</code> field either.
   Both are worked out from <code>startISO</code> and today's date when the card is drawn.
@@ -168,6 +176,9 @@
     <code>&lt;</code>. One more square becomes upcoming, because an occurrence on today
     now counts as still to come. Small change, and it decides whether today counts as
     gone. Put it back.</p>
+    <p>Finally, to see the return-visit line without waiting a week: open the app, then in
+    your browser's storage set <code>lastSeenISO</code> to a date a few weeks back and
+    reload. The card will tell you how many moments passed in between.</p>
   </div>
 
   <h2>Where each planning document lands</h2>

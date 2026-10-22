@@ -14,6 +14,11 @@ var MS_PER_DAY = 86400000;
 var rituals = [];
 var idCounter = 0;
 
+/* How many occurrences slipped by since the user last opened this. Transient:
+   recomputed at startup, never stored, because it is a comparison between two
+   dates rather than a fact about the ritual. */
+var sinceLastSeen = {};
+
 function makeId() {
   idCounter += 1;
   return "r_" + Date.now().toString(36) + "_" + idCounter;
@@ -167,6 +172,7 @@ function seed() {
     startISO: toISODate(start),
     total: totalFrom({ freq: "weekly", durationValue: 12, durationUnit: "years" }),
     kept: [],
+    lastSeenISO: toISODate(startOfToday()),
     isExample: true
   }];
 }
@@ -224,6 +230,15 @@ function buildCard(ritual) {
     ? "Next: " + prettyDate(next) + " · " + roughSpan(startOfToday(), next) + " from now"
     : "This one is over.";
   card.appendChild(when);
+
+  /* The payoff for coming back: the thing that happened while you were away. */
+  if (sinceLastSeen[ritual.id] > 0) {
+    var slip = document.createElement("p");
+    slip.className = "card-slip";
+    slip.textContent = plural(sinceLastSeen[ritual.id], "moment") +
+      " passed since you last looked.";
+    card.appendChild(slip);
+  }
 
   var grid = document.createElement("div");
   grid.className = "grid" + (sizeClassFor(ritual.total) ? " " + sizeClassFor(ritual.total) : "");
@@ -285,6 +300,32 @@ function buildRemove(ritual) {
   btn.textContent = "Remove";
   wrap.appendChild(btn);
   return wrap;
+}
+
+/* Compare each ritual against the day the user last opened the app, so the card
+   can say what slipped by while they were away. Runs once at startup, then moves
+   the marker forward. */
+function notePassage() {
+  var today = startOfToday();
+  for (var i = 0; i < rituals.length; i++) {
+    var ritual = rituals[i];
+    var then = ritual.lastSeenISO ? fromISODate(ritual.lastSeenISO) : null;
+
+    if (then && !isNaN(then.getTime()) && then.getTime() < today.getTime()) {
+      var list = occurrences(ritual);
+      var before = 0;
+      var now = 0;
+      for (var k = 0; k < list.length; k++) {
+        var at = list[k].getTime();
+        if (at <= then.getTime()) before += 1;
+        if (at <= today.getTime()) now += 1;
+      }
+      if (now - before > 0) sinceLastSeen[ritual.id] = now - before;
+    }
+
+    ritual.lastSeenISO = toISODate(today);
+  }
+  save();
 }
 
 function render() {
@@ -440,6 +481,8 @@ function load() {
       startISO: r.startISO,
       total: r.total,
       kept: kept,
+      lastSeenISO: typeof r.lastSeenISO === "string" && /^\d{4}-\d{2}-\d{2}$/.test(r.lastSeenISO)
+        ? r.lastSeenISO : "",
       isExample: r.isExample === true
     });
   }
@@ -519,7 +562,8 @@ function handleAdd(event) {
     durationUnit: durationUnit,
     startISO: toISODate(start),
     total: totalFrom({ freq: freq, durationValue: durationValue, durationUnit: durationUnit }),
-    kept: []
+    kept: [],
+    lastSeenISO: toISODate(startOfToday())
   });
 
   save();
@@ -562,6 +606,7 @@ function init() {
     document.getElementById("add-toggle").setAttribute("aria-expanded", "false");
   });
 
+  notePassage();
   render();
 }
 

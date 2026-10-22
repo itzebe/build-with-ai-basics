@@ -29,7 +29,7 @@ Implements `prd.md > The Core Journey`.
 4. You type into the add form and press save → `handleAdd()` validates the four fields, calls `totalFrom(input)` to work out how many occurrences fit, pushes a new ritual onto the list, calls `save()` and then `render()`. Because the start date is stored, the new card's timeline is already partly elapsed if the phase began in the past.
 5. You tap a passed square → `toggleKept(id, index)` adds or removes that occurrence's index in the ritual's `kept` list, then calls `save()` and `render()`. The kept count on the card changes in the same redraw.
 6. You tap a future square → nothing happens. `toggleKept()` returns early.
-7. You close the tab and come back next week → step 2 runs again, your kept marks are still there because they were written to storage, and **the passed/future split has moved on its own**, because it is recomputed from the clock in step 3.
+7. You close the tab and come back next week → step 2 runs again, your kept marks are still there because they were written to storage, and **the passed/future split has moved on its own**, because it is recomputed from the clock in step 3. Step 3 also compares today to `lastSeenISO` and, if occurrences fell in between, draws the line saying how many passed while you were away.
 
 ## Stack
 
@@ -141,7 +141,8 @@ One file, three concerns, in this order:
     durationUnit: "years",         // "days" | "weeks" | "months" | "years"
     startISO: "2019-03-02",        // when the phase began, local date
     total: 626,                    // computed once at creation, never recomputed
-    kept: [0, 1, 4, 7]             // occurrence indices the user recorded being there for
+    kept: [0, 1, 4, 7],            // occurrence indices the user recorded being there for
+    lastSeenISO: "2026-10-15"      // the day the app was last opened, per ritual
   }
   ```
 
@@ -197,6 +198,8 @@ One file, three concerns, in this order:
   `setMonth` rolls 31 February into 3 March, which would put the whole timeline on the wrong
   days from then on.
 
+- **Noticing the gap.** `notePassage()` runs once at startup, before the first render. For each ritual it counts how many occurrences fell between `lastSeenISO` and today, records that count in the transient `sinceLastSeen` map for `buildCard()` to draw, then moves `lastSeenISO` to today and saves. The count is never persisted, because it describes a difference between two dates rather than a fact about the ritual — storing it would let it go stale exactly the way the old `spent` counter did. A ritual with no `lastSeenISO` (an older record) is skipped rather than shown a bogus number, and gains the field on that first run.
+
 - **Rendering.** `render()` clears `#stack` and rebuilds every card from `rituals`. Rebuilding wholesale rather than diffing is deliberate: the list is tiny, and a full rebuild means the DOM can never disagree with the state.
 
   Each square is a `<button>` with `data-id` and `data-index`, plus `.is-passed` or `.is-upcoming`, and `.is-kept` if its index is in `kept`. Its `aria-label` states the date and what tapping will do, for example `"Saturday 2 March 2019, passed. Not marked as kept. Tap to record you were there."` Future squares are `disabled`, since there is nothing to record about a moment that has not happened.
@@ -235,7 +238,8 @@ One key, one shape, no relationships.
   is always the same Saturday. Storing dates would be redundant and would risk disagreeing with
   a recomputed list.
 - **What happens on return.** `load()` restores the array exactly. Your kept marks are unchanged,
-  and the passed/future split has moved on by however much time has passed. That is the feature.
+  the passed/future split has moved on by however much time has passed, and the card says how
+  many moments slipped by. That is the feature.
 - **What clearing site data does.** It deletes the key. The app then re-seeds the example ritual.
   The UI says so in one small line.
 
@@ -300,6 +304,9 @@ The only browser feature relied on is `localStorage`, which is available in ever
 - **Un-kept moments are never counted** — instead of showing how many passed without you. The
   data is there and the number is trivial to compute. It is left out because it would be the most
   punishing thing on the screen and would turn a reflection tool into a source of guilt.
+- **The gap line is a fact, not a prompt** — "4 moments passed since you last looked", not
+  "you have not opened this in 4 weeks" and not a call to action. It reports what already
+  happened and then stops until real time passes again.
 - **System fonts** — instead of a webfont. Removes the only network dependency the app could have had.
 
 ## Decisions and Open Issues
