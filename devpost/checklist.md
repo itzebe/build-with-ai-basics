@@ -19,15 +19,17 @@ Build mode: fast
   Learner check: Open http://localhost:8000 and look at the card. Does the grid read as "a lot of these left" at a glance, and does the page feel calm rather than like a dashboard?
   Commit: `Add ritual card with remaining-instances grid`
 
-- [x] **2. You can spend an instance and watch the grid shrink**
-  Becomes usable: Tapping a square marks it spent, the square changes, and the remaining count drops by one — immediately, in the same redraw.
-  Why now: This is the unique kernel from `scope.md`. It goes in as early as the first slice allows, because generic scaffolding around a missing kernel is a failed build. It is also the moment worth getting feedback on.
-  PRD ref: `prd.md > Features and Behavior` (Spending an instance), `prd.md > The Core Journey` (step 4)
-  Spec ref: `spec.md > Components` (app.js — rendering), `spec.md > Look and Feel` (motion, spent colour)
-  Build: Add a click handler on the grid. Mark the tapped index spent in the ritual's state, then re-render. Give spent squares the spent colour and `disabled`. Add the 150ms background transition, disabled under `prefers-reduced-motion`. Add `aria-pressed` and a descriptive `aria-label` to each square.
-  Verify (mechanical): Load the page, record the count and square total, tap one square programmatically, and confirm the count decremented by exactly one, the square total decreased by exactly one, and the tapped square is now `disabled`.
-  Learner check: Tap a few squares and watch the row shrink. Does that land the way you pictured it, or does it need to feel more definite?
-  Commit: `Spend an instance by tapping a square`
+- [x] **2. You can see which moments have passed, and record being there**
+      Scope: every occurrence gets a real date, derived from the start date and the
+      frequency. Past dates render quiet, future dates render lit, and tapping a passed
+      square records that you were there — reversibly.
+      Verified: with the seeded ritual, 626 squares render as 366 passed and 260 upcoming.
+      Tapping index 0 changes kept from 0 to 1 and adds `.is-kept`. Tapping it again
+      returns it to 0. Marking indices 0, 1, 2 and 50 stores `[0,1,2,50]`; clearing index
+      1 stores `[0,2,50]`. A tap on a future square does nothing (those are `disabled`).
+      The occurrence list is pure: two calls return identical dates.
+      Note: this slice originally read "you can spend an instance and watch the grid
+      shrink". Revised — see Revisions below.
 
 - [x] **3. You can add your own ritual**
   Becomes usable: An inline form that takes a name, a frequency and a duration, and adds a new card with a correctly calculated full grid.
@@ -49,15 +51,14 @@ Build mode: fast
   Learner check: Spend a square, close the browser completely, reopen it and open the page again. Are the spent squares still spent?
   Commit: `Persist rituals and spent instances to localStorage`
 
-- [x] **5. The grid stays readable, and the last square feels different**
-  Becomes usable: A grid of several hundred squares is still legible and the count stays on screen; a ritual with exactly one instance left reads as notable without looking like an alarm.
-  Why now: The seeded example alone is 626 squares, so this is on the critical path for the demo rather than optional polish. The last-square treatment is where the product does its emotional work.
-  PRD ref: `prd.md > States and Boundaries` (a ritual with many instances, one instance left), `prd.md > Look and Feel` (the squares)
-  Spec ref: `spec.md > Look and Feel` (square size table, the last square)
-  Build: Add the `is-sm` / `is-xs` / `is-xxs` size classes and apply them by count per the spec's table. Add the heavier treatment for the final square — same size, hairline ink border, slightly more weight. Confirm the count never wraps away from the card.
-  Verify (mechanical): Render grids at 20, 626 and 2000 squares and confirm the correct size class is applied at each. Measure the grid's bounding box at 2000 squares and confirm it stays inside the card width with no horizontal overflow. Spend down to one square and confirm the last-square class is applied.
-  Learner check: Spend all but one square of a ritual. Does that last square feel heavier rather than alarming?
-  Commit: `Scale the grid by count and weight the final square`
+- [x] **5. The grid stays readable, and the three states are distinguishable**
+      Scope: size steps down by count so 626 squares stay legible; the three square states
+      (upcoming, passed, kept) are visually distinct; the next upcoming square is weighted.
+      Verified: 626 squares get `is-xxs`. Contrast measured against the card: upcoming
+      5.81:1, kept 9.16:1, passed fill 1.41:1 with a `--passed-edge` hairline at 3.15:1 —
+      the fill is meant to recede, and the edge carries the visibility on a projector.
+      Passed vs upcoming is 4.13:1, so the two are clearly different colours.
+      Revised — see Revisions below.
 
 - [x] **6. A card can finish, and you can remove one**
   Becomes usable: A ritual whose squares are all spent shows a clear finished state, and any ritual can be removed with a confirmation.
@@ -79,8 +80,10 @@ Build mode: fast
 
 - [ ] Final review complete — feedback resolved and learner confirms ready to ship
       Technical review is complete: all six slices verified, plus a full regression
-      pass (first load, spend, add, reload), zero external network requests, WCAG AA
-      contrast, and a 390px mobile pass with touch. This box stays unchecked because
+      pass (first load, mark, undo, add, reload, browser restart), zero external network
+      requests, WCAG AA contrast on text, and a 390px mobile pass with touch. The
+      time-driven redesign was verified end to end, including the two date bugs recorded
+      under Revisions. This box stays unchecked because
       it also asks for the learner's confirmation, which has not been given. The
       remaining learner items are the three checkpoints above and the submission
       copy, which are the learner's own to write.

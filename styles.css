@@ -5,7 +5,9 @@
   --ink-soft: #6b6459;
   --rule: #e6dfd4;
   --live: #2f6f5e;
-  --spent: #d8d1c6;
+  --passed: #ded7cb;
+  --passed-edge: #9c8e78;
+  --kept: #1f4f42;
   --focus: #8a6f3f;
 
   --serif: ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif;
@@ -90,22 +92,45 @@ body {
   color: var(--ink-soft);
 }
 
-.card-count {
-  margin: 0 0 .9rem;
+.card-counts {
+  display: flex;
+  align-items: baseline;
+  gap: 1.75rem;
+  margin: 0 0 .7rem;
+}
+
+.count {
+  margin: 0;
   font-family: var(--serif);
-  font-size: 2.1rem;
   line-height: 1;
   letter-spacing: .02em;
   font-variant-numeric: tabular-nums;
 }
 
-.card-count .unit {
+/* The honest number, and the one you control. Weight is deliberately unequal. */
+.count-left {
+  font-size: 2.1rem;
+  color: var(--ink);
+}
+
+.count-kept {
+  font-size: 1.35rem;
+  color: var(--ink-soft);
+}
+
+.count .unit {
   font-family: var(--sans);
   font-size: .72rem;
   text-transform: uppercase;
   letter-spacing: .08em;
   color: var(--ink-soft);
-  margin-left: .5rem;
+  margin-left: .45rem;
+}
+
+.card-when {
+  margin: 0 0 1.1rem;
+  font-size: .85rem;
+  color: var(--ink-soft);
 }
 
 /* ---------- the grid ---------- */
@@ -124,32 +149,48 @@ body {
   border-radius: 3px;
   background: var(--live);
   cursor: pointer;
-  transition: background-color 150ms ease, transform 150ms ease;
+  transition: background-color 150ms ease;
 }
-
-.sq:hover { background: #26594c; }
 
 .grid.is-sm .sq { width: 15px; height: 15px; }
 .grid.is-xs .sq { width: 11px; height: 11px; }
 .grid.is-xxs .sq { width: 9px; height: 9px; }
 
-/* The last one left. Heavier, not alarming: no red, no pulse. */
+/* Passed is paler than upcoming, not darker: the past recedes and the future
+   stays available. The opposite of a progress bar, which fills up. */
+.sq.is-passed {
+  background: var(--passed);
+  box-shadow: inset 0 0 0 1px var(--passed-edge);
+}
+
+/* A moment you were there for. The darkest thing on the card. */
+.sq.is-kept {
+  background: var(--kept);
+  box-shadow: none;
+}
+
+.sq.is-passed:hover { background: #d3cabb; }
+.sq.is-kept:hover { background: #173b31; }
+
+/* Upcoming squares are not interactive — nothing to record yet. */
+.sq.is-upcoming { cursor: default; }
+
+/* The next one to come. Heavier, not alarming: no red, no pulse. */
 .sq.is-next {
   box-shadow: inset 0 0 0 1.5px var(--ink);
 }
 
-/* Squares leaving: the grid shrinks rather than greying out. */
-.sq.is-leaving {
-  background: var(--spent);
-  transform: scale(.72);
+/* Marking a passed square: it fills toward kept before the redraw. */
+.sq.is-marking {
+  background: var(--kept);
 }
 
 /* ---------- card states ---------- */
 
-.card.is-finished { border-color: var(--spent); }
+.card.is-over { border-color: var(--passed); }
 
-.card-finished {
-  margin: .2rem 0 0;
+.card-over {
+  margin: .9rem 0 0;
   font-family: var(--serif);
   font-size: 1.05rem;
   color: var(--ink-soft);
@@ -254,6 +295,12 @@ button:focus-visible {
 }
 
 .err:empty { min-height: 0; }
+
+.hint {
+  margin: .35rem 0 0;
+  font-size: .76rem;
+  color: var(--ink-soft);
+}
 
 .add-actions { display: flex; gap: .75rem; align-items: center; }
 

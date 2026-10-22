@@ -3,13 +3,18 @@
 Some moments run out. Finite shows you how many are left, one square at a time.
 
 You name a ritual — Saturday pancakes, the weekly call with your dad, Sunday
-lunch at your mum's. You say how often it happens and roughly how long the phase
-lasts. Finite works out how many times it will happen before it is over, and draws
-one square for each one.
+lunch at your mum's. You say how often it happens, how long the phase lasts, and
+when it started. Finite works out the date of every occurrence and draws one square
+for each, in order.
 
-Tapping a square spends it. The square goes, the grid gets smaller, and the count
-drops. That is the whole idea: the number is easy to ignore, but a grid you can
-watch run out is not.
+**The grid moves on its own.** Squares whose date has passed go quiet, whether or
+not you ever opened the app. So the number is not a report on how diligent you have
+been with a tracker — it is what is actually happening. Come back in a week and one
+more square has gone quiet without you touching anything.
+
+You tap a quiet square when you were there for it. It fills in dark, and the kept
+count goes up. Tap it again to take it back; it is a note about the past, not the
+moment itself. The number is easy to ignore, but a grid you can watch run out is not.
 
 ## Who it is for
 
@@ -65,17 +70,35 @@ total = floor(duration × daysPerUnit ÷ daysPerPeriod)
 
 So weekly for 12 years is `12 × 365.25 ÷ 7` → **626**. Yearly for 20 years → **20**.
 Monthly for 3 years → **36**. `floor` rather than round, so the count never promises
-an instance that does not fit. The maximum is 2000 — past that the grid stops
+an occurrence that does not fit. The maximum is 2000 — past that the grid stops
 meaning anything.
+
+### How the grid knows what has passed
+
+Occurrence *n* is the start date plus *n* periods, added with calendar arithmetic
+rather than by adding milliseconds. That matters: adding `7 × 86,400,000` ms across a
+daylight-saving boundary drifts by an hour and can land an occurrence on the wrong
+day. Month ends are clamped too, so starting on 31 January gives 31 Jan → 28 Feb →
+31 Mar, not a march into the wrong month.
+
+**Nothing about the present is stored.** Only the start date, the count, and which
+occurrences you marked. The passed/upcoming split is recomputed from your device's
+clock every time the page is drawn. That is why the grid can never be quietly out of
+date, and why there is no timer or background process anywhere in the app.
 
 ## Using it
 
-1. Open the page. One example ritual is there so the screen is never empty.
-2. Tap a square when a ritual happens. The grid shrinks by one.
-3. Use **Add a ritual** for your own: a name, how often, and how long the phase lasts.
-4. Come back later. Your rituals and their spent squares are still there.
+1. Open the page. One example ritual is there so the screen is never empty, already
+   partly elapsed so you can see the mechanic straight away.
+2. The quiet squares are the ones that have already happened. The lit ones are still
+   to come. Beside them: how many are left, and how many you have kept.
+3. Tap a quiet square if you were there for it. Tap again to undo.
+4. Use **Add a ritual** for your own: a name, how often, how long it lasts, and when
+   it started.
+5. Come back next week. Your kept marks are still there, and one more square has gone
+   quiet on its own.
 
-Spending is one-way. You do not get a Saturday back.
+You cannot mark a square that has not happened yet. There is nothing to record.
 
 ## What was built and why
 
@@ -101,10 +124,12 @@ exists as a calculator, and people read the number once and forget it. The grid 
 the difference — it is the same information, but you can see it. Everything else in
 the app exists to support that one interaction.
 
-**Spent squares disappear instead of greying out.** The first draft of the spec had
-them staying on screen as greyed-out, disabled squares, which is what a habit
-tracker does. That contradicts the point: the grid getting *smaller* is the feeling.
-The spec was corrected to match, and it is recorded in `checklist.md`.
+**Time drives it, not your taps.** The first version only moved when you tapped it.
+That meant setting up "weekly for 12 years", not opening the app for three months,
+and still being told 626 — which is not useful, it is wrong. Now the squares sit on
+real dates and pass on their own, so the headline number is true whether or not you
+opened the app. Tapping records that you were there rather than consuming anything,
+which also means it can be undone. Both changes are recorded in `checklist.md`.
 
 ## What is not here
 
@@ -121,9 +146,15 @@ Finite does arithmetic on what you tell it. It does not predict lifespans and do
 not know anything about anyone's health. If the estimate is wrong, the number is
 wrong.
 
-Instances are consumed when you tap, not as days pass. The grid does not move on
-its own, so the count shows what you have marked rather than what the calendar
-says.
+The grid is derived from your device's clock, and it has no network to check that
+against. A device with the wrong date will show the wrong grid.
+
+The app never tells you how many moments passed without you. That number is trivial
+to compute and is left out on purpose — it would turn a reflection tool into a
+source of guilt.
+
+There is no reminder or notification, so the app only tells you the truth on the
+days you choose to open it.
 
 ## Licence
 

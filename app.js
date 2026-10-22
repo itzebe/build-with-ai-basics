@@ -1,9 +1,15 @@
 /* Finite — some moments run out.
-   State, calculation, rendering and persistence. No dependencies, no network. */
+   State, dates, calculation, rendering and persistence. No dependencies, no network.
+
+   The one idea worth knowing: nothing about the present is stored. Whether a square
+   has passed is worked out from the clock every time the page is drawn, so the grid
+   moves on its own and can never be quietly out of date. The only thing saved about
+   the past is which occurrences you recorded being there for. */
 
 var DAYS_PER_PERIOD = { daily: 1, weekly: 7, monthly: 30.4375, yearly: 365.25 };
 var DAYS_PER_UNIT = { days: 1, weeks: 7, months: 30.4375, years: 365.25 };
 var MAX_TOTAL = 2000;
+var MS_PER_DAY = 86400000;
 
 var rituals = [];
 var idCounter = 0;
@@ -13,8 +19,58 @@ function makeId() {
   return "r_" + Date.now().toString(36) + "_" + idCounter;
 }
 
-/* How many instances of this ritual fit in the phase the user described. */
-function remainingFrom(input) {
+/* ---------- dates ---------- */
+
+function startOfToday() {
+  var d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+/* Local calendar date as YYYY-MM-DD. Not toISOString(), which is UTC and can
+   land on the wrong day either side of midnight. */
+function toISODate(date) {
+  var m = String(date.getMonth() + 1);
+  var d = String(date.getDate());
+  if (m.length < 2) m = "0" + m;
+  if (d.length < 2) d = "0" + d;
+  return date.getFullYear() + "-" + m + "-" + d;
+}
+
+function fromISODate(iso) {
+  var parts = String(iso).split("-");
+  return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+}
+
+/* Calendar arithmetic, not milliseconds: adding 7 x 86,400,000ms across a
+   daylight-saving boundary drifts by an hour and can land on the wrong day.
+   Note the `n === undefined` check rather than `n || 1` — with `|| 1` an n of 0
+   silently became 1, which made occurrence 0 a duplicate of occurrence 1. */
+function addPeriod(date, freq, n) {
+  var d = new Date(date.getTime());
+  var amount = (n === undefined || n === null) ? 1 : n;
+  if (freq === "daily") {
+    d.setDate(d.getDate() + amount);
+  } else if (freq === "weekly") {
+    d.setDate(d.getDate() + 7 * amount);
+  } else if (freq === "monthly") {
+    var day = d.getDate();
+    d.setDate(1);
+    d.setMonth(d.getMonth() + amount);
+    /* Clamp to the last day of the target month, so 31 Jan + 1 month is
+       28/29 Feb rather than overflowing into March. */
+    var lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+    d.setDate(Math.min(day, lastDay));
+  } else {
+    d.setFullYear(d.getFullYear() + amount);
+  }
+  return d;
+}
+
+/* ---------- calculation ---------- */
+
+/* How many occurrences fit in the phase the user described. */
+function totalFrom(input) {
   var period = DAYS_PER_PERIOD[input.freq];
   var unit = DAYS_PER_UNIT[input.durationUnit];
   if (!period || !unit) return 0;
@@ -23,8 +79,32 @@ function remainingFrom(input) {
   return Math.max(1, Math.floor(days / period));
 }
 
-function remaining(ritual) {
-  return Math.max(0, ritual.total - ritual.spent);
+/* Every occurrence of a ritual, in date order. Pure: depends only on the stored
+   fields, so it returns the same list every call — which is what makes an index
+   in `kept` a stable way to identify a moment. */
+function occurrences(ritual) {
+  var list = [];
+  var start = fromISODate(ritual.startISO);
+  for (var n = 0; n < ritual.total; n++) {
+    list.push(addPeriod(start, ritual.freq, n));
+  }
+  return list;
+}
+
+/* Split into what has gone and what is still to come. An occurrence today counts
+   as passed, because the day has already begun. */
+function splitOccurrences(list, today) {
+  var passed = [];
+  var upcoming = [];
+  for (var i = 0; i < list.length; i++) {
+    if (list[i].getTime() <= today.getTime()) passed.push(i);
+    else upcoming.push(i);
+  }
+  return { passed: passed, upcoming: upcoming };
+}
+
+function isKept(ritual, index) {
+  return ritual.kept.indexOf(index) !== -1;
 }
 
 /* Square size steps down as the count grows, so a big grid stays legible. */
@@ -41,27 +121,64 @@ function plural(n, word) {
 
 var FREQ_WORDS = { daily: "Every day", weekly: "Every week", monthly: "Every month", yearly: "Every year" };
 
-/* "Every week, for 12 years" — plain language, no jargon. */
 function describe(ritual) {
   return FREQ_WORDS[ritual.freq] + ", for " +
     plural(ritual.durationValue, ritual.durationUnit.replace(/s$/, ""));
 }
 
+var MONTHS = ["January", "February", "March", "April", "May", "June",
+              "July", "August", "September", "October", "November", "December"];
+var WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+function prettyDate(date) {
+  return WEEKDAYS[date.getDay()] + " " + date.getDate() + " " +
+    MONTHS[date.getMonth()] + " " + date.getFullYear();
+}
+
+function shortDate(date) {
+  return date.getDate() + " " + MONTHS[date.getMonth()].slice(0, 3) + " " + date.getFullYear();
+}
+
+/* "about 10 years", "about 4 months", "about 3 weeks" — a rough sense of scale. */
+function roughSpan(from, to) {
+  var days = Math.round((to.getTime() - from.getTime()) / MS_PER_DAY);
+  if (days < 14) return "about " + plural(days, "day");
+  if (days < 70) return "about " + plural(Math.round(days / 7), "week");
+  if (days < 730) return "about " + plural(Math.round(days / 30.4375), "month");
+  return "about " + plural(Math.round(days / 365.25), "year");
+}
+
+/* ---------- seeding ---------- */
+
+/* Starts seven years ago on purpose: a ritual starting today would show a fully
+   lit grid, which hides the whole mechanic on first run. Snapped to a Saturday so
+   the seeded "Saturday pancakes" actually lands on Saturdays. */
 function seed() {
+  var start = startOfToday();
+  start.setFullYear(start.getFullYear() - 7);
+  var toSaturday = (6 - start.getDay() + 7) % 7;
+  start.setDate(start.getDate() + toSaturday);
   return [{
     id: makeId(),
     name: "Saturday pancakes",
     freq: "weekly",
     durationValue: 12,
     durationUnit: "years",
-    total: remainingFrom({ freq: "weekly", durationValue: 12, durationUnit: "years" }),
-    spent: 0,
+    startISO: toISODate(start),
+    total: totalFrom({ freq: "weekly", durationValue: 12, durationUnit: "years" }),
+    kept: [],
     isExample: true
   }];
 }
 
+/* ---------- rendering ---------- */
+
 function buildCard(ritual) {
-  var left = remaining(ritual);
+  var list = occurrences(ritual);
+  var split = splitOccurrences(list, startOfToday());
+  var left = split.upcoming.length;
+  var kept = ritual.kept.length;
+  var next = left ? list[split.upcoming[0]] : null;
 
   var card = document.createElement("article");
   card.className = "card";
@@ -74,48 +191,85 @@ function buildCard(ritual) {
 
   var meta = document.createElement("p");
   meta.className = "card-meta";
-  meta.textContent = describe(ritual) + (ritual.isExample ? " · an example, remove it any time" : "");
+  meta.textContent = describe(ritual) + " · since " + shortDate(fromISODate(ritual.startISO)) +
+    (ritual.isExample ? " · an example, remove it any time" : "");
   card.appendChild(meta);
 
-  var count = document.createElement("p");
-  count.className = "card-count";
-  count.textContent = String(left);
-  var unit = document.createElement("span");
-  unit.className = "unit";
-  unit.textContent = left === 0 ? "all spent" : "left";
-  count.appendChild(unit);
-  card.appendChild(count);
+  var counts = document.createElement("div");
+  counts.className = "card-counts";
 
-  /* Every square used up. Say so plainly, offer to remove it. */
-  if (left === 0) {
-    card.classList.add("is-finished");
-    var done = document.createElement("p");
-    done.className = "card-finished";
-    done.textContent = "That is all of them.";
-    card.appendChild(done);
-    card.appendChild(buildRemove(ritual));
-    return card;
-  }
+  var leftBlock = document.createElement("p");
+  leftBlock.className = "count count-left";
+  leftBlock.textContent = String(left);
+  var leftUnit = document.createElement("span");
+  leftUnit.className = "unit";
+  leftUnit.textContent = "left";
+  leftBlock.appendChild(leftUnit);
+  counts.appendChild(leftBlock);
+
+  var keptBlock = document.createElement("p");
+  keptBlock.className = "count count-kept";
+  keptBlock.textContent = String(kept);
+  var keptUnit = document.createElement("span");
+  keptUnit.className = "unit";
+  keptUnit.textContent = "kept";
+  keptBlock.appendChild(keptUnit);
+  counts.appendChild(keptBlock);
+
+  card.appendChild(counts);
+
+  var when = document.createElement("p");
+  when.className = "card-when";
+  when.textContent = next
+    ? "Next: " + prettyDate(next) + " · " + roughSpan(startOfToday(), next) + " from now"
+    : "This one is over.";
+  card.appendChild(when);
 
   var grid = document.createElement("div");
   grid.className = "grid" + (sizeClassFor(ritual.total) ? " " + sizeClassFor(ritual.total) : "");
   grid.setAttribute("role", "group");
-  grid.setAttribute("aria-label", ritual.name + ": " + left + " of " + ritual.total + " remaining");
+  grid.setAttribute("aria-label", ritual.name + ": " + left + " still to come, " +
+    kept + " recorded as kept, out of " + ritual.total);
 
-  /* One square per moment still to come. The grid is the count. */
-  for (var i = 0; i < left; i++) {
+  var passedSet = {};
+  for (var p = 0; p < split.passed.length; p++) passedSet[split.passed[p]] = true;
+
+  for (var i = 0; i < list.length; i++) {
+    var isPassed = passedSet[i] === true;
+    var marked = isKept(ritual, i);
+
     var sq = document.createElement("button");
     sq.type = "button";
-    sq.className = "sq";
+    sq.className = "sq " + (isPassed ? "is-passed" : "is-upcoming");
     sq.setAttribute("data-id", ritual.id);
     sq.setAttribute("data-index", String(i));
-    if (i === left - 1) sq.classList.add("is-next");
-    sq.setAttribute("aria-label",
-      "Mark one " + ritual.name + " as used. " + (left - 1) + " would remain.");
+    if (marked) sq.classList.add("is-kept");
+
+    if (isPassed) {
+      sq.setAttribute("aria-label", prettyDate(list[i]) + ", passed. " +
+        (marked ? "Marked as kept. Tap to clear."
+                : "Not marked. Tap to record you were there."));
+    } else {
+      sq.disabled = true;
+      sq.setAttribute("aria-label", prettyDate(list[i]) + ", still to come.");
+    }
+
     grid.appendChild(sq);
   }
 
+  var upcoming = grid.querySelectorAll(".is-upcoming");
+  if (upcoming.length) upcoming[0].classList.add("is-next");
+
   card.appendChild(grid);
+
+  if (!left) {
+    card.classList.add("is-over");
+    var over = document.createElement("p");
+    over.className = "card-over";
+    over.textContent = "Every one of these has passed.";
+    card.appendChild(over);
+  }
+
   card.appendChild(buildRemove(ritual));
   return card;
 }
@@ -136,26 +290,28 @@ function buildRemove(ritual) {
 function render() {
   var stack = document.getElementById("stack");
   stack.textContent = "";
+  var today = startOfToday();
 
   if (!rituals.length) {
     var empty = document.createElement("p");
     empty.className = "empty";
-    empty.textContent = "No rituals yet. Add one, and it will show you how many times it happens before it is over.";
+    empty.textContent = "No rituals yet. Add one, and it will show you how many are still to come.";
     stack.appendChild(empty);
   }
 
+  var totalLeft = 0;
   for (var i = 0; i < rituals.length; i++) {
     stack.appendChild(buildCard(rituals[i]));
+    totalLeft += splitOccurrences(occurrences(rituals[i]), today).upcoming.length;
   }
-
-  var totalLeft = 0;
-  for (var j = 0; j < rituals.length; j++) totalLeft += remaining(rituals[j]);
 
   var totalEl = document.getElementById("total");
   totalEl.textContent = rituals.length
-    ? plural(totalLeft, "moment") + " left across " + plural(rituals.length, "ritual")
+    ? plural(totalLeft, "moment") + " still to come across " + plural(rituals.length, "ritual")
     : "";
 }
+
+/* ---------- interaction ---------- */
 
 function findRitual(id) {
   for (var i = 0; i < rituals.length; i++) {
@@ -164,34 +320,34 @@ function findRitual(id) {
   return null;
 }
 
-/* Spending is one-way. You do not get a Saturday back.
-   The square fades, then the grid redraws one smaller, so the count and the
-   grid move together and the loss is visible rather than merely stated. */
-function spend(id, square) {
+/* Recording is reversible: a tap is a note about the past, not the moment itself. */
+function toggleKept(id, index, square) {
   var ritual = findRitual(id);
-  if (!ritual || remaining(ritual) <= 0) return;
+  if (!ritual) return;
 
-  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (reduced || !square) {
-    ritual.spent += 1;
-    save();
+  var list = occurrences(ritual);
+  if (index < 0 || index >= list.length) return;
+  if (list[index].getTime() > startOfToday().getTime()) return;
+
+  var at = ritual.kept.indexOf(index);
+  if (at === -1) ritual.kept.push(index);
+  else ritual.kept.splice(at, 1);
+  ritual.kept.sort(function (a, b) { return a - b; });
+
+  save();
+
+  if (square && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    square.classList.add("is-marking");
+    window.setTimeout(render, 150);
+  } else {
     render();
-    return;
   }
-
-  square.classList.add("is-leaving");
-  square.disabled = true;
-  window.setTimeout(function () {
-    ritual.spent += 1;
-    save();
-    render();
-  }, 150);
 }
 
 function removeRitual(id) {
   var ritual = findRitual(id);
   if (!ritual) return;
-  if (!window.confirm("Remove \"" + ritual.name + "\"? This cannot be undone.")) return;
+  if (!window.confirm('Remove "' + ritual.name + '"? This cannot be undone.')) return;
   var next = [];
   for (var i = 0; i < rituals.length; i++) {
     if (rituals[i].id !== id) next.push(rituals[i]);
@@ -209,7 +365,7 @@ function handleClick(event) {
   }
   var sq = event.target.closest(".sq");
   if (!sq || sq.disabled) return;
-  spend(sq.getAttribute("data-id"), sq);
+  toggleKept(sq.getAttribute("data-id"), Number(sq.getAttribute("data-index")), sq);
 }
 
 /* ---------- persistence ---------- */
@@ -217,16 +373,18 @@ function handleClick(event) {
 var STORAGE_KEY = "finite.rituals.v1";
 var storageOK = true;
 
-/* Each restored ritual is checked for the fields it needs, so a malformed
-   or half-written record is discarded rather than rendered as NaN. */
+/* Each restored ritual is checked for the fields it needs, so a malformed or
+   half-written record is discarded rather than rendered as NaN. */
 function isUsableRitual(r) {
   return r && typeof r === "object" &&
     typeof r.name === "string" && r.name.length > 0 &&
     typeof r.freq === "string" && DAYS_PER_PERIOD[r.freq] !== undefined &&
     typeof r.durationValue === "number" && isFinite(r.durationValue) && r.durationValue > 0 &&
     typeof r.durationUnit === "string" && DAYS_PER_UNIT[r.durationUnit] !== undefined &&
-    typeof r.total === "number" && isFinite(r.total) && r.total > 0 &&
-    typeof r.spent === "number" && isFinite(r.spent) && r.spent >= 0;
+    typeof r.startISO === "string" && /^\d{4}-\d{2}-\d{2}$/.test(r.startISO) &&
+    !isNaN(fromISODate(r.startISO).getTime()) &&
+    typeof r.total === "number" && isFinite(r.total) && r.total > 0 && r.total <= MAX_TOTAL &&
+    Array.isArray(r.kept);
 }
 
 function save() {
@@ -259,18 +417,31 @@ function load() {
 
   var clean = [];
   for (var i = 0; i < parsed.length; i++) {
-    if (isUsableRitual(parsed[i])) {
-      clean.push({
-        id: parsed[i].id || makeId(),
-        name: parsed[i].name,
-        freq: parsed[i].freq,
-        durationValue: parsed[i].durationValue,
-        durationUnit: parsed[i].durationUnit,
-        total: parsed[i].total,
-        spent: Math.min(parsed[i].spent, parsed[i].total),
-        isExample: parsed[i].isExample === true
-      });
+    var r = parsed[i];
+    if (!isUsableRitual(r)) continue;
+
+    /* Keep only indices naming a real occurrence, so a stale mark cannot point
+       at a square that does not exist. */
+    var kept = [];
+    for (var k = 0; k < r.kept.length; k++) {
+      var idx = r.kept[k];
+      if (typeof idx === "number" && idx >= 0 && idx < r.total && kept.indexOf(idx) === -1) {
+        kept.push(idx);
+      }
     }
+    kept.sort(function (a, b) { return a - b; });
+
+    clean.push({
+      id: typeof r.id === "string" && r.id ? r.id : makeId(),
+      name: r.name,
+      freq: r.freq,
+      durationValue: r.durationValue,
+      durationUnit: r.durationUnit,
+      startISO: r.startISO,
+      total: r.total,
+      kept: kept,
+      isExample: r.isExample === true
+    });
   }
   return clean.length ? clean : null;
 }
@@ -278,8 +449,8 @@ function load() {
 /* If the browser will not keep anything, say so once rather than pretending. */
 function noteIfStorageUnavailable() {
   if (storageOK) return;
-  var note = document.getElementById("storage-note");
-  note.textContent = "This browser is not keeping data right now, so your rituals will not be here next time.";
+  document.getElementById("storage-note").textContent =
+    "This browser is not keeping data right now, so your rituals will not be here next time.";
 }
 
 /* ---------- adding a ritual ---------- */
@@ -291,6 +462,7 @@ function setError(fieldId, message) {
 function clearErrors() {
   setError("e-name", "");
   setError("e-dur", "");
+  setError("e-start", "");
 }
 
 function handleAdd(event) {
@@ -301,6 +473,7 @@ function handleAdd(event) {
   var freq = document.getElementById("f-freq").value;
   var durationValue = parseInt(document.getElementById("f-dur").value, 10);
   var durationUnit = document.getElementById("f-unit").value;
+  var startISO = document.getElementById("f-start").value;
 
   var ok = true;
 
@@ -313,10 +486,25 @@ function handleAdd(event) {
     setError("e-dur", "How long does this last? Enter a number above zero.");
     ok = false;
   } else {
-    var total = remainingFrom({ freq: freq, durationValue: durationValue, durationUnit: durationUnit });
+    var total = totalFrom({ freq: freq, durationValue: durationValue, durationUnit: durationUnit });
     if (total > MAX_TOTAL) {
       setError("e-dur", "That works out to " + total.toLocaleString() +
         " moments — more than this can draw. Try a shorter stretch.");
+      ok = false;
+    }
+  }
+
+  var start = null;
+  if (!startISO) {
+    setError("e-start", "When did it start? Today is fine.");
+    ok = false;
+  } else {
+    start = fromISODate(startISO);
+    if (isNaN(start.getTime())) {
+      setError("e-start", "That date does not look right.");
+      ok = false;
+    } else if (start.getTime() > startOfToday().getTime()) {
+      setError("e-start", "This cannot start in the future.");
       ok = false;
     }
   }
@@ -329,8 +517,9 @@ function handleAdd(event) {
     freq: freq,
     durationValue: durationValue,
     durationUnit: durationUnit,
-    total: remainingFrom({ freq: freq, durationValue: durationValue, durationUnit: durationUnit }),
-    spent: 0
+    startISO: toISODate(start),
+    total: totalFrom({ freq: freq, durationValue: durationValue, durationUnit: durationUnit }),
+    kept: []
   });
 
   save();
@@ -338,9 +527,12 @@ function handleAdd(event) {
 
   document.getElementById("f-name").value = "";
   document.getElementById("f-dur").value = "12";
+  document.getElementById("f-start").value = toISODate(startOfToday());
   document.getElementById("add-fields").hidden = true;
   document.getElementById("add-toggle").setAttribute("aria-expanded", "false");
 }
+
+/* ---------- start ---------- */
 
 function init() {
   var stored = load();
@@ -351,6 +543,8 @@ function init() {
     save();
   }
   noteIfStorageUnavailable();
+
+  document.getElementById("f-start").value = toISODate(startOfToday());
 
   document.getElementById("stack").addEventListener("click", handleClick);
   document.getElementById("add-form").addEventListener("submit", handleAdd);

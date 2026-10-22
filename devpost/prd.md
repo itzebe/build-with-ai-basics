@@ -5,20 +5,27 @@ status: approved
 
 # Finite — Product Requirements
 
-One line: a single-page app that shows a grid of remaining instances for each recurring ritual you name, and lets you spend one by tapping it.
+One line: a single-page app that lays each recurring ritual out as a timeline of real dates, so you can see how many are still to come, which have already passed, and how many you were actually there for.
 Source: `scope.md > The Core Loop`, `scope.md > The Unique Kernel`.
+
+**Revision (2026-10-22):** the first version let the user "spend" instances by tapping,
+and the grid never moved unless they did. That made the headline number a report on their
+own tap discipline rather than a fact about the world — set up "weekly for 12 years", not
+open the app for three months, and it still said 626. The grid is now a real timeline.
+Squares pass on their own. Tapping records presence rather than consuming anything.
 
 ## The Core Journey
 
 1. You open the app. It loads instantly and shows a short line explaining what it is.
 2. Below that is a stack of ritual cards. On first use, one example ritual is already there so the screen is never empty.
-3. Each card shows the ritual's name, how often it happens, how many instances remain, and a grid of squares — one square per remaining instance.
-4. You tap a square on a card. That square goes dark permanently and the remaining count drops by one.
-5. You tap **Add a ritual**. A small form appears: what it is, how often, and roughly how long the phase runs.
-6. You save it. The new card appears in the stack with a full grid and a count worked out from your answers.
-7. You close the tab and come back later. Your rituals are still there, and the squares you spent are still spent.
+3. Each card shows the ritual's name, how often it happens, two counts, and a grid of squares laid out on a timeline — one square per occurrence, in date order, from the day the phase started.
+4. Squares at the front of the grid have already gone quiet. Those moments have passed. The rest are still lit. Nothing you did made that happen; time did.
+5. You tap a quiet square if you were there for it. It fills in dark and the kept count goes up. Tapping it again clears it — you are recording a fact, not spending anything.
+6. You tap **Add a ritual**. A small form appears: what it is, how often, how long the phase runs, and when it started.
+7. You save it. The new card appears with its own timeline, already partly elapsed if you said the phase began a while ago.
+8. You close the tab and come back next week. Your rituals are still there, your kept squares are still marked, and **one more square has gone quiet without you touching anything**.
 
-Success is: a stranger opens the page, understands it in five seconds, and taps a square.
+Success is: a stranger opens the page, understands it in five seconds, and can tell you how many are left and when the next one is.
 
 ## Screens and Layout
 
@@ -27,19 +34,20 @@ One screen. No navigation, no modals, no separate routes.
 Top to bottom:
 
 - A short title and a one-line explanation. Deliberately brief — two sentences at most.
-- A quiet total across all rituals: how many instances remain in total. Small type, not the focus.
+- A quiet total across all rituals: how many moments remain in total. Small type, not the focus.
 - The stack of ritual cards, newest added at the bottom.
 - An **Add a ritual** control at the end of the stack.
 
-Each card, left to right:
+Each card, top to bottom:
 
 - The ritual's name, in serif, largest text on the card.
 - Under it, a line of small text: the frequency and the end of the phase, phrased plainly.
-- The remaining count, large and prominent.
-- The grid of squares, wrapping across as many rows as needed.
+- **Two counts, side by side.** *Left* is the large, prominent one — how many are still to come. *Kept* is smaller and quieter — how many you recorded being there for. The visual weight is deliberate: the honest number is the one that moves on its own, and the one you control should not shout.
+- A short line naming the next occurrence: "Next: Saturday, 25 October." This is the only actionable thing on the card, so it is stated plainly rather than styled as a call to action.
+- The grid of squares, wrapping across as many rows as needed. Squares that have passed are visibly quieter than squares still to come.
 - A small, quiet way to remove a card.
 
-The add form appears inline under the stack, not as an overlay. It has three fields, a save button and a cancel. No other controls.
+The add form appears inline under the stack, not as an overlay. It has four fields — name, frequency, duration, and when it started — a save button and a cancel. No other controls.
 
 ## Look and Feel
 
@@ -64,25 +72,37 @@ The main surface. Shows every ritual the user has, in the order added.
 - The count and the grid are always consistent with each other — the count is the number of remaining squares.
 - Cards never reorder on their own.
 
-### Spending an instance
+### Time passing
 
-The core interaction, and the kernel.
+The kernel, and the reason the app is useful rather than a one-time calculation.
 
-- Tapping a remaining square marks it spent, permanently.
-- The square changes appearance immediately, and the count on the card decrements in the same frame.
-- A spent square cannot be un-spent by tapping it again. Reversing a mistake is a separate, deliberate action, not an accidental double-tap.
-- Tapping a spent square does nothing.
-- If the user spends the final square, the card shows a distinct finished state rather than an empty box.
+- Every occurrence of a ritual sits on a real date, worked out from the start date and the frequency.
+- A square represents one occurrence. Squares whose date is in the past are rendered as passed; squares whose date is in the future are rendered as still to come.
+- This is derived from the clock every time the page is drawn. Nothing is stored about which squares have passed, so the app cannot drift out of date and does not need to run in the background.
+- The **Left** count is the number of future occurrences. It decreases on its own as days go by.
+- The grid therefore looks different every time the user returns, even if they changed nothing. That is the point.
+
+### Recording that you were there
+
+The one interaction, and the one that makes the app personal.
+
+- Tapping a **passed** square marks it kept. It fills in dark and the kept count rises.
+- Tapping a kept square again clears it. This is deliberate and is the opposite of the first version: recording a fact about the past should be correctable, because a mistap is a data error, not a moment lost.
+- Tapping a **future** square does nothing. You cannot record being present at something that has not happened.
+- Kept state is stored per occurrence, so it survives reloads and is not affected by time passing.
+- No count is shown of moments that passed un-kept. The app does not score you.
+- If every square has passed, the card says the phase is over and offers to remove it.
 
 ### Adding a ritual
 
-An inline form with three inputs.
+An inline form with four inputs.
 
 - **What is it** — free text, the ritual's name. Required.
 - **How often** — a choice of daily, weekly, monthly, or yearly. Required.
-- **How long does this last** — a number of days, weeks, months, or years, or an end date. Required.
+- **How long does this last** — a number of days, weeks, months, or years. Required.
+- **When did it start** — a date, defaulting to today. Required, and the field that makes the timeline real. Without it the app cannot know which squares have already passed.
 
-On save: the remaining count is calculated, the card is added with a full grid, and the form resets. The new card is immediately usable.
+On save: the occurrence dates are worked out from the start date and frequency, the card is added with its timeline already partly elapsed if the start date is in the past, and the form resets. The new card is immediately usable.
 
 ### Removing a ritual
 
@@ -90,21 +110,25 @@ A quiet text control on each card, separate from the grid so it cannot be hit by
 
 ## States and Boundaries
 
-- **First use** — one example ritual is present so the screen is never empty, with a short line making clear it is an example and can be removed.
+- **First use** — one example ritual is present so the screen is never empty, with a short line making clear it is an example and can be removed. Its start date is set in the past so the timeline is already partly elapsed and the mechanic is visible immediately.
 - **Empty state** — if the user removes everything, show a single calm line inviting them to add a ritual. Not an illustration, not a call to action with an exclamation mark.
 - **A ritual with many instances** — a grid of 100+ squares must still be readable and must not push the count off screen. Squares shrink past a threshold, and the grid wraps.
-- **A ritual with one instance left** — the card should read as notable without alarm. This is where the product does its work; the last square should feel different in weight, not in colour.
-- **Finished** — all squares spent. The card says so plainly and offers to remove it.
-- **Invalid input** — an empty name, a zero or negative duration, or a duration so large the count is absurd. Show a short inline message next to the field. Never silently accept.
-- **Persistence** — rituals and their spent squares are saved in the browser and survive closing the tab. There is no account and no server, so this is per-browser. Clearing site data clears the rituals, and the app says so in one small line.
+- **A ritual with one occurrence left** — the card should read as notable without alarm. This is where the product does its work; the last lit square should feel different in weight, not in colour.
+- **A phase that has ended** — every square has passed. The card says so plainly and offers to remove it. It does not say "finished" or congratulate anyone.
+- **A ritual started today** — nothing has passed yet, so the grid is entirely lit. This is the honest starting state and the app should not pretend otherwise.
+- **An occurrence today** — counts as passed, because the day has begun. Stated in the spec so the boundary is not ambiguous.
+- **Invalid input** — an empty name, a zero or negative duration, a start date in the future, or a duration so large the count is absurd. Show a short inline message next to the field. Never silently accept.
+- **Persistence** — rituals and the occurrences you recorded are saved in the browser and survive closing the tab. There is no account and no server, so this is per-browser. Clearing site data clears the rituals, and the app says so in one small line.
 - **Boundaries** — everything is local. Nothing is transmitted anywhere. The app makes no network requests at all.
 
 ## Product Decisions
 
 - **A grid rather than a number** — the number alone is the thing that already exists elsewhere; the grid is what makes it land. This is the kernel, so it is built first.
+- **Time drives the depletion, not the user** — this is the change that makes the app useful. A number that only moves when you tap it tells you about your tapping, not about your life. A number that moves on its own is true whether or not you opened the app.
 - **Any ritual, not just parents** — the user names their own. This is the main difference from existing "time left with your parents" calculators.
 - **The user supplies the estimate** — the app does arithmetic on what it is told. It does not model lifespans and does not imply precision it does not have.
-- **Spending is one-way** — it mirrors the thing being modelled. You cannot get a Saturday back. Undo exists only as a deliberate act.
+- **Kept is correctable** — recording a fact about the past can be a mistake, so tapping again clears it. The first version made spending permanent to mirror the irreversibility of time, but that was solving the wrong problem: the moment is gone regardless, and the tap is just a note about it.
+- **Un-kept moments are never counted or shown** — the app does not tell you how many you missed. That number would be the most punishing thing on the screen and would turn a reflection tool into a source of guilt.
 - **No notifications** — the product depends on the user choosing to look. Being nagged would contradict the point.
 - **One screen, no navigation** — keeps the build small and keeps the focus on the grid.
 - **Warm and quiet, not morbid** — the tone is the difference between a tool someone keeps and one they close immediately.
@@ -114,23 +138,26 @@ A quiet text control on each card, separate from the grid so it cannot be hit by
 Everything the proof of concept must do to be complete:
 
 - A single page with a stack of ritual cards.
-- One example ritual present on first use.
-- Add a ritual from an inline form with name, frequency, and duration.
-- Calculate remaining instances from the user's answers.
-- Render a grid of one square per remaining instance.
-- Spend an instance by tapping a square; the count and grid update together.
-- A finished state when the last square is spent.
+- One example ritual present on first use, already partly elapsed.
+- Add a ritual from an inline form with name, frequency, duration and start date.
+- Work out every occurrence date from the start date and frequency.
+- Render a grid of one square per occurrence, in date order.
+- Mark squares whose date has passed, derived from the clock on every render, so the grid moves on its own.
+- Show two counts per ritual: still to come, and kept.
+- Show the date of the next occurrence.
+- Record presence by tapping a passed square, and undo it by tapping again.
+- Do nothing when a future square is tapped.
+- A phase-ended state when every square has passed.
 - Remove a ritual, with confirmation.
-- Persist rituals and spent squares in the browser across sessions.
+- Persist rituals and recorded occurrences in the browser across sessions.
 - Input validation with inline messages.
-- The look and feel above, including the last-square treatment and reduced-motion support.
+- The look and feel above, including the next-square treatment and reduced-motion support.
 
 ## Deferred From the POC
 
 - **Editing a ritual after creating it** — needs a form-in-place and re-calculation path. Deferred because adding and removing covers the demo, and editing doubles the form work.
-- **Backdating already-spent instances** — genuinely useful for a real user, but it adds a date picker and a second calculation path. The POC starts everyone at a full grid.
-- **Undo as a first-class action** — spending is one-way in the POC. A real undo belongs with an edit affordance.
-- **Percentage of the phase elapsed** — needs a start date to be meaningful, which the POC does not collect.
+- **A week-in-review line** — "3 passed, you were there for 2." Useful, and the data is already there, but it needs wording that does not read as a score.
+- **Percentage of the phase elapsed** — a bar would compete with the grid for attention, and the grid already says it better.
 
 ## Possible Later Enhancements
 

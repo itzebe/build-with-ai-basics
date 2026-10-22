@@ -15,7 +15,15 @@ Every ritual you have is finite and nobody tells you when it ends. You find out 
 
 Most tools answer "how many times will I see my parents?" with a single number about one fixed relationship. Finite is different in three ways: it works for **any** ritual the user names, the user supplies it rather than a lookup table, and it is **a grid of squares you watch deplete** rather than a number you read once.
 
-The kernel is the depletion. A number is trivia. Tapping one square and watching the grid get smaller is a feeling.
+The kernel is the depletion. A number is trivia. A grid you watch get smaller is a feeling.
+
+**Revision (2026-10-22): the depletion is driven by real time, not by taps.** In the
+first version the grid only moved when the user tapped it, which made the number a
+report on the user's own discipline rather than a fact about the world. If you set up
+"weekly for 12 years" and did not open the app for three months, it still said 626. That
+is not useful — it is wrong. The grid is now a timeline: each square sits on a real date,
+and squares pass on their own as the weeks go by. Tapping no longer consumes anything.
+It records that you were there.
 
 ## Who It's For
 
@@ -30,11 +38,23 @@ What they do today instead: nothing, or they do the calculation once after readi
 
 ## The Core Loop
 
-They open it. They see their rituals as a stack of grids. Each grid has some squares still lit and some spent.
+They open it. They see their rituals as a stack of grids. Each grid is a timeline from
+the day the phase started to the day it ends — one square per occurrence, in date order.
 
-They tap a square when a ritual happens — one more used up. The grid shrinks by one. The count drops.
+Because the squares are on real dates, the grid has already moved since last time. Some
+squares at the front have gone quiet: those moments have passed. The rest are still lit:
+they have not happened yet.
 
-They come back because the number moved. It is the only app that tells them the truth every week: **you have N left.**
+They tap a passed square when they were there for it. It fills in dark. That is not
+spending anything — it is keeping a record. The count of kept moments goes up.
+
+They come back because the number moved without them. It is the only thing that tells
+them the truth every week: **you have N left, and the next one is on Saturday.**
+
+Two numbers per ritual, and the difference between them is the point:
+
+- **Left** — still to come. Moves on its own. This is the honest one.
+- **Kept** — how many you recorded being present for. This is what you did with them.
 
 ## Inspiration & Identity
 
@@ -58,23 +78,38 @@ This is a personal tool first. It is being built as a working proof of concept f
 
 ## What "Working" Looks Like
 
-You open a single page. There is a ritual already there — say, Saturday pancakes, with a grid of squares.
+You open a single page. There is a ritual already there — Saturday pancakes, with a grid
+of squares laid out along a timeline.
 
-You tap one square. It goes dark. The count next to it drops by one, and the grid is visibly smaller.
+You can see at a glance that some squares at the start have gone quiet. Those Saturdays
+have already happened. The rest are still lit. Beside them: **522 left**, and underneath,
+*about 10 years*.
 
-You add your own ritual: a name, how often it happens, and roughly when the phase ends. It appears in the stack with a full grid, and its count is calculated from your answers. Close the tab, reopen it, and it is still there with the squares you spent still spent.
+You tap a quiet square — one you were there for. It fills in dark, and the kept count
+goes up. You can tap it again to undo, because you are recording a fact about the past,
+not spending anything.
 
-**The "oh, that's cool" beat:** tapping a square and watching the row shrink in real time. The number and the grid move together, and for a second the abstraction becomes visible.
+You add your own ritual: a name, how often it happens, how long the phase lasts, and when
+it started. It appears in the stack with its own timeline, already partly elapsed if you
+told it the phase began a while ago. Close the tab, reopen it, and it is still there with
+your kept squares still marked.
+
+**The "oh, that's cool" beat:** the grid has moved on its own. Come back a week later and
+one more square has gone quiet without you doing anything. The number is not a report on
+your discipline. It is what is actually happening.
 
 ## The POC Boundary
 
 In:
 
 - One screen, a stack of rituals.
-- Add a ritual: name, frequency, remaining timeframe.
-- A grid of squares per ritual, one square per remaining instance.
-- Tap a square to spend an instance. The grid shrinks and the count drops.
-- Rituals persist in the browser between visits.
+- Add a ritual: name, frequency, how long the phase lasts, and when it started.
+- A grid of squares per ritual, one square per occurrence, laid out on real dates.
+- Squares pass on their own as time goes by, whether or not the app is open.
+- Tap a passed square to record that you were there; tap again to undo.
+- Two counts per ritual: still to come, and kept.
+- The next occurrence's date, so the app tells you something you can act on.
+- Rituals and recorded moments persist in the browser between visits.
 
 Out: accounts, sharing, notifications, reminders, syncing, editing a ritual after it is created, calendars, statistics, export.
 
@@ -82,8 +117,8 @@ Out: accounts, sharing, notifications, reminders, syncing, editing a ritual afte
 
 - Editing and deleting a ritual.
 - A gentle nudge when a grid crosses a threshold.
-- Backdating: marking instances that already happened before you installed it.
-- Showing the percentage of the phase already gone.
+- A week-in-review line: what passed, what you kept.
+- Sharing a grid as a static image.
 
 ## Explicitly Cut
 
@@ -92,3 +127,4 @@ Out: accounts, sharing, notifications, reminders, syncing, editing a ritual afte
 - **AI-generated messages or reflections** — would add an API dependency and a failure mode, and would not strengthen the depletion idea. Cut for the POC.
 - **Sharing a grid** — tempting and genuinely nice, but it needs a backend. Named so it does not sneak back in.
 - **Precision beyond the user's own estimate** — the app reports what the user told it. It does not predict lifespans, and it should not imply that it does.
+- **Guilt mechanics** — no red marks for un-kept moments, no streaks, no percentage-present score. The moment has passed either way; scoring it would turn a reflection tool into a source of shame, and that is the opposite of the intent.
