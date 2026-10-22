@@ -76,6 +76,40 @@ Build mode: fast
 - [ ] Persistence confirmed by the learner — after slice 4, closing the browser entirely
 - [ ] Final kick-the-tires exploration and feedback completed
 
+## Submission Handoff
+
+What is done, and what is the learner's own to finish. None of the items below has been
+done on the learner's behalf.
+
+- [x] App complete and verified; live at
+      https://work-1-yrluinyyypugxots.prod-runtime.all-hands.dev/ (a sandbox URL, so the
+      video is the durable artefact).
+- [x] Public repository: https://github.com/itzebe/build-with-ai-basics
+- [x] Required planning docs present at the repo root and in `devpost/`.
+- [x] No secrets, no private context, learner profile gitignored and never committed.
+- [ ] Demo video, 1-3 minutes, showing it working end to end.
+- [ ] Learner-written project name, description, and Devpost form fields.
+- [ ] Submit on Devpost.
+
+### A suggested recording path
+
+Not a script, and not narration — the learner writes that. Just the moves that show the
+kernel working, in about a minute:
+
+1. Open the page. The seeded ritual is already partly elapsed: quiet squares behind, lit
+   ones ahead, and two counts. Say what the two numbers are.
+2. Tap a quiet square. It fills in. Tap it again and it clears.
+3. Add a ritual with a start date well in the past — a daily one a year back works well.
+   The grid appears already mostly gone, which shows time is doing the work rather than
+   the tapping. This is the move that proves the idea without waiting a week.
+4. For the return-visit line without waiting: in the browser's storage set `lastSeenISO`
+   on the seeded ritual to a date a few weeks back, then reload. The card says how many
+   moments passed in between.
+5. Reload once more to show the kept marks survived.
+
+The one thing worth saying out loud, because it is the whole idea: the number moves
+whether or not you open the app.
+
 ## Final Review
 
 - [ ] Final review complete — feedback resolved and learner confirms ready to ship
