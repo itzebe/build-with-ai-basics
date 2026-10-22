@@ -247,6 +247,12 @@ body {
 
 .card.is-over { border-color: var(--passed); }
 
+.card-over-how {
+  margin: .35rem 0 0;
+  font-size: .8rem;
+  color: var(--ink-soft);
+}
+
 .card-over {
   margin: .9rem 0 0;
   font-family: var(--serif);

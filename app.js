@@ -19,6 +19,12 @@ var idCounter = 0;
    dates rather than a fact about the ritual. */
 var sinceLastSeen = {};
 
+/* Roving tabindex: only one square per grid is tabbable. Without this a keyboard
+   user has to press Tab once per passed square - 365 times for a 12-year weekly
+   ritual - before reaching the add form. Focus is remembered here so that
+   re-rendering after a mark does not drop the user back to the top of the page. */
+var focusWanted = null;
+
 function makeId() {
   idCounter += 1;
   return "r_" + Date.now().toString(36) + "_" + idCounter;
@@ -144,6 +150,12 @@ function shortDate(date) {
   return date.getDate() + " " + MONTHS[date.getMonth()].slice(0, 3) + " " + date.getFullYear();
 }
 
+/* When the phase ends, taken from the last occurrence rather than added up
+   separately, so the stated end can never disagree with the grid. */
+function endsOn(list) {
+  return list.length ? list[list.length - 1] : null;
+}
+
 /* "about 10 years", "about 4 months", "about 3 weeks" — a rough sense of scale. */
 function roughSpan(from, to) {
   var days = Math.round((to.getTime() - from.getTime()) / MS_PER_DAY);
@@ -197,7 +209,9 @@ function buildCard(ritual) {
 
   var meta = document.createElement("p");
   meta.className = "card-meta";
+  var last = endsOn(list);
   meta.textContent = describe(ritual) + " · since " + shortDate(fromISODate(ritual.startISO)) +
+    (last ? ", until " + shortDate(last) : "") +
     (ritual.isExample ? " · an example, remove it any time" : "");
   card.appendChild(meta);
 
@@ -244,10 +258,25 @@ function buildCard(ritual) {
   grid.className = "grid" + (sizeClassFor(ritual.total) ? " " + sizeClassFor(ritual.total) : "");
   grid.setAttribute("role", "group");
   grid.setAttribute("aria-label", ritual.name + ": " + left + " still to come, " +
-    kept + " recorded as kept, out of " + ritual.total);
+    kept + " recorded as kept, out of " + ritual.total +
+    ". Use the arrow keys to move between squares.");
 
   var passedSet = {};
   for (var p = 0; p < split.passed.length; p++) passedSet[split.passed[p]] = true;
+
+  /* The tab stop for this grid: where focus is, or the first square that can be
+     acted on. If nothing can be acted on yet - a ritual whose phase has not
+     started producing passed moments - the grid takes no tab stop at all rather
+     than parking it on a disabled button nobody can focus. */
+  var stopIndex = -1;
+  if (focusWanted && focusWanted.id === ritual.id) {
+    stopIndex = focusWanted.index;
+  } else if (split.passed.length) {
+    stopIndex = split.passed[0];
+  }
+  if (stopIndex >= list.length || (stopIndex >= 0 && passedSet[stopIndex] !== true)) {
+    stopIndex = split.passed.length ? split.passed[0] : -1;
+  }
 
   for (var i = 0; i < list.length; i++) {
     var isPassed = passedSet[i] === true;
@@ -269,6 +298,9 @@ function buildCard(ritual) {
       sq.setAttribute("aria-label", prettyDate(list[i]) + ", still to come.");
     }
 
+    /* One tab stop per grid; arrows move within it. */
+    sq.tabIndex = (i === stopIndex) ? 0 : -1;
+
     grid.appendChild(sq);
   }
 
@@ -282,6 +314,10 @@ function buildCard(ritual) {
     var over = document.createElement("p");
     over.className = "card-over";
     over.textContent = "Every one of these has passed.";
+    var overHow = document.createElement("p");
+    overHow.className = "card-over-how";
+    overHow.textContent = "Mark any you were there for, or remove it below.";
+    over.appendChild(overHow);
     card.appendChild(over);
   }
 
@@ -350,6 +386,21 @@ function render() {
   totalEl.textContent = rituals.length
     ? plural(totalLeft, "moment") + " still to come across " + plural(rituals.length, "ritual")
     : "";
+
+  /* Marking rebuilds the card, so put focus back on the square the user acted on
+     rather than dropping them at the top of the page. */
+  if (focusWanted) {
+    var back = stack.querySelector('.sq[data-id="' + focusWanted.id +
+      '"][data-index="' + focusWanted.index + '"]');
+    if (back) {
+      for (var j = 0; j < back.parentNode.children.length; j++) {
+        back.parentNode.children[j].tabIndex = -1;
+      }
+      back.tabIndex = 0;
+      back.focus();
+    }
+    focusWanted = null;
+  }
 }
 
 /* ---------- interaction ---------- */
@@ -406,7 +457,66 @@ function handleClick(event) {
   }
   var sq = event.target.closest(".sq");
   if (!sq || sq.disabled) return;
+  focusWanted = { id: sq.getAttribute("data-id"), index: Number(sq.getAttribute("data-index")) };
   toggleKept(sq.getAttribute("data-id"), Number(sq.getAttribute("data-index")), sq);
+}
+
+/* Arrow keys move within a grid instead of tabbing through it. Tab therefore
+   steps over the whole grid, which is the point: the grid is one stop, not 626.
+   Movement is clamped to the squares that can actually be acted on - a disabled
+   button cannot take focus, so aiming at one would silently do nothing. The
+   actionable squares are always a contiguous run at the front (passed ones), so
+   clamping to that run keeps Up/Down aligned with the visual rows too. */
+function handleKeydown(event) {
+  var sq = event.target.closest ? event.target.closest(".sq") : null;
+  if (!sq) return;
+
+  var key = event.key;
+  if (key !== "ArrowRight" && key !== "ArrowLeft" && key !== "ArrowUp" && key !== "ArrowDown" &&
+      key !== "Home" && key !== "End") return;
+
+  var grid = sq.parentNode;
+  var squares = grid.querySelectorAll(".sq");
+  if (!squares.length) return;
+
+  var limit = 0;
+  for (var s = 0; s < squares.length; s++) {
+    if (!squares[s].disabled) limit += 1;
+  }
+  if (!limit) return;
+
+  var index = Number(sq.getAttribute("data-index"));
+  var target = index;
+  var columnCount = gridColumnCount(grid);
+
+  if (key === "ArrowRight") target = index + 1;
+  else if (key === "ArrowLeft") target = index - 1;
+  else if (key === "ArrowDown") target = index + columnCount;
+  else if (key === "ArrowUp") target = index - columnCount;
+  else if (key === "Home") target = 0;
+  else if (key === "End") target = limit - 1;
+
+  if (target < 0) target = 0;
+  if (target > limit - 1) target = limit - 1;
+  event.preventDefault();
+
+  for (var i = 0; i < squares.length; i++) squares[i].tabIndex = -1;
+  squares[target].tabIndex = 0;
+  squares[target].focus();
+}
+
+/* How many squares fit on one row, so Up and Down move by a visual row rather
+   than by one square. Measured from the laid-out grid rather than guessed. */
+function gridColumnCount(grid) {
+  var squares = grid.querySelectorAll(".sq");
+  if (squares.length < 2) return 1;
+  var top = squares[0].getBoundingClientRect().top;
+  var count = 0;
+  for (var i = 0; i < squares.length; i++) {
+    if (Math.abs(squares[i].getBoundingClientRect().top - top) > 1) break;
+    count += 1;
+  }
+  return count || 1;
 }
 
 /* ---------- persistence ---------- */
@@ -591,6 +701,7 @@ function init() {
   document.getElementById("f-start").value = toISODate(startOfToday());
 
   document.getElementById("stack").addEventListener("click", handleClick);
+  document.getElementById("stack").addEventListener("keydown", handleKeydown);
   document.getElementById("add-form").addEventListener("submit", handleAdd);
 
   document.getElementById("add-toggle").addEventListener("click", function () {

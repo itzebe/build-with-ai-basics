@@ -117,6 +117,7 @@ In:
 - Tap a passed square to record that you were there; tap again to undo.
 - Two counts per ritual: still to come, and kept.
 - The next occurrence's date, so the app tells you something you can act on.
+- When the phase ends, taken from the last square so it cannot contradict the grid.
 - A note on return saying how many moments passed since you last looked.
 - Rituals and recorded moments persist in the browser between visits.
 

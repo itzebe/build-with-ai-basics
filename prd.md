@@ -49,7 +49,7 @@ Top to bottom:
 Each card, top to bottom:
 
 - The ritual's name, in serif, largest text on the card.
-- Under it, a line of small text: the frequency and the end of the phase, phrased plainly.
+- Under it, a line of small text: the frequency, when it started, and **when it ends** — "Every week, for 12 years · since 26 Oct 2019, until 18 Oct 2031". The end date is taken from the last square rather than added up separately, so the stated end can never disagree with the grid.
 - **Two counts, side by side.** *Left* is the large, prominent one — how many are still to come. *Kept* is smaller and quieter — how many you recorded being there for. The visual weight is deliberate: the honest number is the one that moves on its own, and the one you control should not shout.
 - A short line naming the next occurrence: "Next: Saturday, 25 October." This is the only actionable thing on the card, so it is stated plainly rather than styled as a call to action.
 - **On return only**, a line saying what changed while you were away: "4 moments passed since you last looked." It appears once, the first time you open the app on a new day, and then the marker moves forward. It is not a notification and does not accumulate — if you reload twice in an afternoon it does not repeat.
@@ -90,6 +90,20 @@ The kernel, and the reason the app is useful rather than a one-time calculation.
 - This is derived from the clock every time the page is drawn. Nothing is stored about which squares have passed, so the app cannot drift out of date and does not need to run in the background.
 - The **Left** count is the number of future occurrences. It decreases on its own as days go by.
 - The grid therefore looks different every time the user returns, even if they changed nothing. That is the point.
+
+### Working without a mouse
+
+The grid is 626 controls. Reaching the add form by pressing Tab through all of them is not
+usable, so the grid behaves as one stop.
+
+- Only one square per grid is in the tab order. Tab moves past the whole grid to the next control.
+- Arrow keys move between squares: left and right by one, up and down by a visual row.
+- Home and End jump to the first and last square that can actually be acted on.
+- Movement is clamped to squares that can be acted on. A disabled button cannot take focus, so
+  aiming at a future square would silently do nothing.
+- Enter or Space marks the focused square, and focus stays on that square after the card
+  redraws rather than dropping the user back to the top of the page.
+- A grid with nothing to act on yet — every occurrence still ahead — takes no tab stop at all.
 
 ### Learning how to read it
 

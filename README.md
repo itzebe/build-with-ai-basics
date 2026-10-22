@@ -53,6 +53,7 @@ Three files.
 | File | What it does |
 |---|---|
 | `index.html` | The shell. Header, the legend, the stack container, and the add form. |
+| `favicon.svg` | Three squares, one in each state. The tab icon. |
 | `styles.css` | Palette, typography, and the squares. |
 | `app.js` | State, the calculation, rendering, and saving. |
 
@@ -129,6 +130,12 @@ Built for the Devpost **Build With AI: Basics** hackathon, following that
 curriculum's plan-first workflow.
 
 ### Two decisions worth calling out
+
+**The grid is one tab stop, not 626.** A keyboard user cannot be asked to press Tab once
+per passed square — 365 times for the seeded ritual. Only one square per grid is in the tab
+order; arrow keys move inside it. `handleKeydown()` clamps movement to the squares that can
+be acted on, because a disabled button cannot take focus and an unclamped move would appear
+to do nothing.
 
 **The legend carries the same classes as the grid.** The three swatches in the legend are
 styled by the same rules as the real squares (`.sq.is-passed, .key-swatch.is-passed`, and so

@@ -76,6 +76,30 @@ Build mode: fast
 - [ ] Persistence confirmed by the learner — after slice 4, closing the browser entirely
 - [ ] Final kick-the-tires exploration and feedback completed
 
+## Revisions After The First Review
+
+A pass over the finished app against the judging criteria, which turned up real defects
+rather than polish.
+
+- **Keyboard navigation was unusable.** Every passed square was a tab stop, so a keyboard
+  user pressed Tab up to 365 times to get past one grid. The grid is now a single tab stop
+  with arrow-key movement inside it, and focus survives the redraw after a mark.
+- **The end of the phase was not stated.** `prd.md` promised the frequency and the end date
+  on each card; only the frequency and start were shown. The end date is now shown, taken
+  from the last square so it cannot disagree with the grid.
+- **The "next one" ring was unexplained** on screen. It is now in the legend.
+- **A finished phase offered no next step.** The card said every moment had passed and left
+  it there. It now points at what can still be done.
+- **No favicon and a thin page title**, which showed in the browser tab during a demo. Both
+  fixed, with a social preview description alongside.
+
+Verified afterwards: one tab stop per 626-square grid; arrows move one square and one visual
+row; End lands on the last actionable square; a grid with nothing actionable takes no tab
+stop; a fully-passed card is still markable by keyboard; the stated end date equals the last
+square's date; `localStorage` blocked at load still lets the app work for the session and
+shows the warning line; contrast of the new meta line is 5.75:1; no console errors, no
+external requests, no 404s; mobile has no overflow and touch marking still works.
+
 ## Submission Handoff
 
 What is done, and what is the learner's own to finish. None of the items below has been

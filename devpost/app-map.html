@@ -127,6 +127,13 @@
       would let it go stale. That is why the old <code>spent</code> counter had to go.
     </div>
     <div class="stop">
+      <b>app.js → <code>handleKeydown()</code></b><br>
+      The grid is one tab stop, not 626. Only a single square per grid carries
+      <code>tabIndex = 0</code>; arrows move within it and clamp to the squares that can
+      actually be acted on, because a disabled button cannot take focus. Without this,
+      reaching the add form by keyboard meant pressing Tab 365 times.
+    </div>
+    <div class="stop">
       <b>app.js → <code>save()</code> and <code>load()</code></b><br>
       <code>load()</code> validates every record with <code>isUsableRitual()</code> and
       throws away anything malformed, so bad data can never reach the screen as
