@@ -16,7 +16,7 @@ Squares pass on their own. Tapping records presence rather than consuming anythi
 
 ## The Core Journey
 
-1. You open the app. It loads instantly and shows a short line explaining what it is.
+1. You open the app. It loads instantly and shows a short line explaining what it is, then a legend showing what the three square colours mean and that you tap a passed square if you were there.
 2. Below that is a stack of ritual cards. On first use, one example ritual is already there so the screen is never empty.
 3. Each card shows the ritual's name, how often it happens, two counts, and a grid of squares laid out on a timeline — one square per occurrence, in date order, from the day the phase started.
 4. Squares at the front of the grid have already gone quiet. Those moments have passed. The rest are still lit. Nothing you did made that happen; time did.
@@ -34,6 +34,12 @@ One screen. No navigation, no modals, no separate routes.
 Top to bottom:
 
 - A short title and a one-line explanation. Deliberately brief — two sentences at most.
+- **A legend, teaching the three square states.** This is not decoration. A pale square, a
+  green square and a dark square mean three different things, and none of them is guessable
+  from looking. One row: a swatch and a word for each, plus a single line saying what tapping
+  does. It stays on the page rather than being dismissed, because it is the only place the
+  mechanic is explained and a returning user still benefits from the reminder. Quiet enough
+  to read as a caption rather than a tutorial.
 - A quiet total across all rituals: how many moments remain in total. Small type, not the focus.
 - The stack of ritual cards, newest added at the bottom.
 - An **Add a ritual** control at the end of the stack.
@@ -83,6 +89,17 @@ The kernel, and the reason the app is useful rather than a one-time calculation.
 - The **Left** count is the number of future occurrences. It decreases on its own as days go by.
 - The grid therefore looks different every time the user returns, even if they changed nothing. That is the point.
 
+### Learning how to read it
+
+The screen must be self-explanatory, because there is nobody to explain it.
+
+- A legend sits directly under the lede, before the first card.
+- It shows the three square states as small swatches with a word each: still to come, passed, kept.
+- One line under it says what tapping does: tap a passed square if you were there for it.
+- It is a caption, not a tutorial. No arrows, no numbered steps, no overlay, no dismissal.
+- It stays permanently. The mechanic is not obvious even on a second visit, and a first-time
+  reviewer watching a two-minute video needs it on screen in the first five seconds.
+
 ### Noticing the gap
 
 The reason to come back, and the difference between a tool and a one-time calculation.
@@ -121,7 +138,7 @@ A quiet text control on each card, separate from the grid so it cannot be hit by
 
 ## States and Boundaries
 
-- **First use** — one example ritual is present so the screen is never empty, with a short line making clear it is an example and can be removed. Its start date is set in the past so the timeline is already partly elapsed and the mechanic is visible immediately.
+- **First use** — one example ritual is present so the screen is never empty, with a short line making clear it is an example and can be removed. Its start date is set in the past so the timeline is already partly elapsed and the mechanic is visible immediately, and the legend above it explains what the colours mean before the user has to guess.
 - **Empty state** — if the user removes everything, show a single calm line inviting them to add a ritual. Not an illustration, not a call to action with an exclamation mark.
 - **A ritual with many instances** — a grid of 100+ squares must still be readable and must not push the count off screen. Squares shrink past a threshold, and the grid wraps.
 - **A ritual with one occurrence left** — the card should read as notable without alarm. This is where the product does its work; the last lit square should feel different in weight, not in colour.

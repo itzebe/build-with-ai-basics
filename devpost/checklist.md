@@ -96,8 +96,10 @@ done on the learner's behalf.
 Not a script, and not narration — the learner writes that. Just the moves that show the
 kernel working, in about a minute:
 
-1. Open the page. The seeded ritual is already partly elapsed: quiet squares behind, lit
-   ones ahead, and two counts. Say what the two numbers are.
+1. Open the page. The legend is under the title: four swatches and one line saying to tap a
+   passed square if you were there. Point at it, because it is what makes the rest legible.
+   Then the seeded ritual, already partly elapsed: quiet squares behind, lit ones ahead, and
+   two counts. Say what the two numbers are.
 2. Tap a quiet square. It fills in. Tap it again and it clears.
 3. Add a ritual with a start date well in the past — a daily one a year back works well.
    The grid appears already mostly gone, which shows time is doing the work rather than

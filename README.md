@@ -52,7 +52,7 @@ Three files.
 
 | File | What it does |
 |---|---|
-| `index.html` | The shell. Header, the stack container, and the add form. |
+| `index.html` | The shell. Header, the legend, the stack container, and the add form. |
 | `styles.css` | Palette, typography, and the squares. |
 | `app.js` | State, the calculation, rendering, and saving. |
 
@@ -98,8 +98,9 @@ let it go stale in exactly the way the old counter did.
 
 ## Using it
 
-1. Open the page. One example ritual is there so the screen is never empty, already
-   partly elapsed so you can see the mechanic straight away.
+1. Open the page. A short legend under the title shows what the three square colours
+   mean, and what tapping does. Then one example ritual is already there, partly elapsed
+   so you can see the mechanic straight away.
 2. The quiet squares are the ones that have already happened. The lit ones are still
    to come. Beside them: how many are left, and how many you have kept.
 3. Tap a quiet square if you were there for it. Tap again to undo.
@@ -128,6 +129,12 @@ Built for the Devpost **Build With AI: Basics** hackathon, following that
 curriculum's plan-first workflow.
 
 ### Two decisions worth calling out
+
+**The legend carries the same classes as the grid.** The three swatches in the legend are
+styled by the same rules as the real squares (`.sq.is-passed, .key-swatch.is-passed`, and so
+on), so the legend cannot drift out of step with what it describes. Change a colour in the
+stylesheet and both change together. A legend that lies about the colours is worse than no
+legend at all.
 
 **A grid rather than a number.** "How many times will I see my parents?" already
 exists as a calculator, and people read the number once and forget it. The grid is

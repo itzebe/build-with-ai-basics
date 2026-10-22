@@ -84,6 +84,11 @@ This is a personal tool first. It is being built as a working proof of concept f
 You open a single page. There is a ritual already there — Saturday pancakes, with a grid
 of squares laid out along a timeline.
 
+Before anything else there is a legend: a pale square marked *passed*, a green one marked
+*still to come*, a dark one marked *kept*, and one line saying to tap a passed square if you
+were there for it. Nothing about the grid is guessable, so it is explained rather than left
+to be worked out.
+
 You can see at a glance that some squares at the start have gone quiet. Those Saturdays
 have already happened. The rest are still lit. Beside them: **522 left**, and underneath,
 *about 10 years*.

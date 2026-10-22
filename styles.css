@@ -35,7 +35,7 @@ body {
 
 /* ---------- masthead ---------- */
 
-.masthead { margin-bottom: 2.5rem; }
+.masthead { margin-bottom: 1.75rem; }
 
 .masthead h1 {
   margin: 0 0 .5rem;
@@ -50,6 +50,48 @@ body {
   max-width: 34rem;
   color: var(--ink-soft);
   font-size: .95rem;
+}
+
+/* ---------- legend ---------- */
+
+/* A caption, not a tutorial: it teaches the three states without pretending to be
+   a control. Sits above the first card so it is read before the grid is guessed at. */
+.legend {
+  margin: 0 0 2rem;
+  padding: .85rem 1rem;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+}
+
+.legend-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem 1.4rem;
+  margin: 0;
+  font-size: .82rem;
+  color: var(--ink-soft);
+}
+
+.key {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+}
+
+.key-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex: none;
+}
+
+.legend-how {
+  margin: .7rem 0 0;
+  padding-top: .7rem;
+  border-top: 1px solid var(--rule);
+  font-size: .82rem;
+  color: var(--ink);
 }
 
 /* ---------- total ---------- */
@@ -166,15 +208,19 @@ body {
 .grid.is-xs .sq { width: 11px; height: 11px; }
 .grid.is-xxs .sq { width: 9px; height: 9px; }
 
-/* Passed is paler than upcoming, not darker: the past recedes and the future
+/* The three states, shared by the grid and the legend so the two can never
+   disagree about what a colour means.
+   Passed is paler than upcoming, not darker: the past recedes and the future
    stays available. The opposite of a progress bar, which fills up. */
-.sq.is-passed {
+.sq.is-passed,
+.key-swatch.is-passed {
   background: var(--passed);
   box-shadow: inset 0 0 0 1px var(--passed-edge);
 }
 
 /* A moment you were there for. The darkest thing on the card. */
-.sq.is-kept {
+.sq.is-kept,
+.key-swatch.is-kept {
   background: var(--kept);
   box-shadow: none;
 }
@@ -184,9 +230,11 @@ body {
 
 /* Upcoming squares are not interactive — nothing to record yet. */
 .sq.is-upcoming { cursor: default; }
+.key-swatch.is-upcoming { background: var(--live); }
 
 /* The next one to come. Heavier, not alarming: no red, no pulse. */
-.sq.is-next {
+.sq.is-next,
+.key-swatch.is-next {
   box-shadow: inset 0 0 0 1.5px var(--ink);
 }
 
