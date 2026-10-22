@@ -1,0 +1,10 @@
+# Local credentials
+.env
+.env.*
+!.env.example
+
+# Devpost learning workspace: personal context, not a submission artifact
+/devpost/learner-profile.md
+
+# Agent working memory (personal notes, not project material)
+.openhands/memory/
