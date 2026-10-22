@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finite — code map</title>
+<style>
+  :root {
+    --paper: #faf7f2; --card: #fffdf9; --ink: #1c1a17; --ink-soft: #6b6459;
+    --rule: #e6dfd4; --live: #2f6f5e; --focus: #8a6f3f;
+    --serif: ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 3.5rem 1.25rem 5rem;
+    background: var(--paper); color: var(--ink);
+    font-family: var(--sans); line-height: 1.6;
+  }
+  .page { max-width: 52rem; margin: 0 auto; }
+  h1 { font-family: var(--serif); font-size: 1.9rem; font-weight: 400; margin: 0 0 .4rem; }
+  h2 {
+    font-size: .72rem; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--ink-soft); font-weight: 600;
+    margin: 3rem 0 1rem; padding-bottom: .5rem; border-bottom: 1px solid var(--rule);
+  }
+  h3 { font-family: var(--serif); font-size: 1.15rem; font-weight: 400; margin: 1.8rem 0 .5rem; }
+  .lede { color: var(--ink-soft); margin: 0 0 1rem; max-width: 38rem; font-size: .95rem; }
+  p { margin: .6rem 0; }
+  code, .mono { font-family: var(--mono); font-size: .86em; }
+  code { background: #f2ece2; padding: .1em .35em; border-radius: 3px; }
+  a { color: var(--live); }
+  .files { display: flex; flex-direction: column; gap: .75rem; margin: 1rem 0; }
+  .file {
+    background: var(--card); border: 1px solid var(--rule); border-radius: 6px;
+    padding: 1rem 1.2rem;
+  }
+  .file .path { font-family: var(--mono); font-size: .88rem; }
+  .file .role { color: var(--ink-soft); font-size: .88rem; margin-top: .25rem; }
+  .route {
+    border-left: 2px solid var(--live); padding: .2rem 0 .2rem 1rem;
+    margin: 1rem 0;
+  }
+  .route .stop { margin: .5rem 0; }
+  .route .stop b { font-family: var(--mono); font-size: .86rem; font-weight: 600; }
+  ol, ul { padding-left: 1.3rem; }
+  li { margin: .35rem 0; }
+  .tag {
+    display: inline-block; font-size: .68rem; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--ink-soft);
+    border: 1px solid var(--rule); border-radius: 999px; padding: .1rem .5rem;
+    margin-left: .4rem; vertical-align: middle;
+  }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: .9rem; }
+  th, td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid var(--rule); }
+  th { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); }
+  .practice {
+    background: var(--card); border: 1px solid var(--rule);
+    border-left: 2px solid var(--focus); border-radius: 6px;
+    padding: 1.2rem 1.4rem; margin: 1.5rem 0;
+  }
+  footer { margin-top: 3.5rem; padding-top: 1rem; border-top: 1px solid var(--rule);
+           color: var(--ink-soft); font-size: .8rem; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>Finite — code map</h1>
+  <p class="lede">Where everything lives in the finished app, and the route to follow to
+  understand it. Three files, no dependencies, nothing hidden.</p>
+
+  <h2>The whole app</h2>
+  <div class="files">
+    <div class="file">
+      <div class="path">index.html</div>
+      <div class="role">The shell. Header, the empty <code>#stack</code> container the script
+      fills, and the add form. No ritual content is hard-coded.</div>
+    </div>
+    <div class="file">
+      <div class="path">styles.css</div>
+      <div class="role">Palette tokens, typography, the square sizes, and the card states.
+      The squares are the only thing that moves.</div>
+    </div>
+    <div class="file">
+      <div class="path">app.js</div>
+      <div class="role">All the logic, in five labelled sections: state, calculation,
+      rendering, persistence, and adding a ritual.</div>
+    </div>
+  </div>
+  <p>That is the entire application. There is no build step and no dependency to install,
+  so what you read is what runs.</p>
+
+  <h2>The guided route</h2>
+  <p>Follow these in order. Each stop is small and each one builds on the last.</p>
+
+  <div class="route">
+    <div class="stop">
+      <b>app.js → <code>remainingFrom(input)</code></b> <span class="tag">start here</span><br>
+      The one piece of real logic. Converts both sides to days and divides, with
+      <code>Math.floor</code> so the count never promises an instance that does not fit.
+      Try changing <code>weekly</code> to <code>daily</code> and see the count jump.
+    </div>
+    <div class="stop">
+      <b>app.js → <code>buildCard(ritual)</code></b><br>
+      Turns one ritual into DOM. Note the loop that creates one square per remaining
+      instance — <b>the grid <i>is</i> the count</b>, not a picture of it.
+    </div>
+    <div class="stop">
+      <b>app.js → <code>spend(id, square)</code></b><br>
+      The kernel. Adds <code>.is-leaving</code>, waits 150ms, then increments
+      <code>spent</code> and re-renders. The whole product is this function.
+    </div>
+    <div class="stop">
+      <b>app.js → <code>save()</code> and <code>load()</code></b><br>
+      <code>load()</code> validates every record with <code>isUsableRitual()</code> and
+      throws away anything malformed, so bad data can never reach the screen as
+      <code>NaN</code>.
+    </div>
+    <div class="stop">
+      <b>styles.css → <code>.sq</code> and the size classes</b><br>
+      Where the grid stays legible from 1 square to 2000, and where
+      <code>prefers-reduced-motion</code> switches the animation off.
+    </div>
+  </div>
+
+  <h2>The state</h2>
+  <p>One array, one storage key. Each ritual looks like this:</p>
+  <table>
+    <tr><th>Field</th><th>Meaning</th></tr>
+    <tr><td class="mono">name</td><td>What the user called it.</td></tr>
+    <tr><td class="mono">freq</td><td>daily / weekly / monthly / yearly.</td></tr>
+    <tr><td class="mono">durationValue</td><td>The number they typed.</td></tr>
+    <tr><td class="mono">durationUnit</td><td>days / weeks / months / years.</td></tr>
+    <tr><td class="mono">total</td><td>Worked out once when created, then never recomputed.</td></tr>
+    <tr><td class="mono">spent</td><td>How many have been used. Just a number.</td></tr>
+  </table>
+  <p>There is no <code>remaining</code> field. It is always <code>total - spent</code>,
+  worked out when it is needed, so the stored number and the drawn grid cannot drift
+  apart.</p>
+  <p>Everything is kept in <code>localStorage["finite.rituals.v1"]</code>. The
+  <code>.v1</code> means a future change of shape can be spotted rather than crashing
+  on old data.</p>
+
+  <h2>Try changing something</h2>
+  <div class="practice">
+    <p><b>A small change to make it yours.</b> The seed ritual in <code>seed()</code> is
+    Saturday pancakes, weekly, 12 years. Replace it with a ritual of your own — the real
+    frequency and the real length — then reload the page and clear the stored data so it
+    re-seeds.</p>
+    <p>Watch what happens to the grid when you change the frequency from
+    <code>weekly</code> to <code>daily</code> while leaving the duration alone. Same
+    phase, ten times as many squares. That difference is the entire argument for
+    drawing the grid instead of printing the number.</p>
+    <p>Then open <code>spend()</code> and delete the 150ms timeout, so it re-renders
+    immediately. The interaction still works, but it stops feeling like the square is
+    leaving. Put it back.</p>
+  </div>
+
+  <h2>Where each planning document lands</h2>
+  <table>
+    <tr><th>Document</th><th>Becomes</th></tr>
+    <tr><td><a href="scope.md">scope.md</a></td><td>The kernel — grid shrinking is the product. Everything else supports it.</td></tr>
+    <tr><td><a href="prd.md">prd.md</a></td><td>The screens, the states, and the tone of the copy.</td></tr>
+    <tr><td><a href="spec.md">spec.md</a></td><td>The calculation rules, the size table, and the failure modes.</td></tr>
+    <tr><td><a href="checklist.md">checklist.md</a></td><td>The six slices, each with how it was verified.</td></tr>
+  </table>
+
+  <h2>One thing to know</h2>
+  <p>The <code>--spent</code> colour is barely used. A spent square leaves the grid
+  rather than staying on screen greyed out, because the grid getting smaller is the
+  point. The first draft of the spec had it the other way round, and
+  <a href="checklist.md">checklist.md</a> records the correction.</p>
+
+  <footer>
+    Finite — built for the Devpost <i>Build With AI: Basics</i> hackathon.
+    Run it with <code>python3 -m http.server 8000</code>.
+  </footer>
+
+</div>
+</body>
+</html>
