@@ -1,0 +1,147 @@
+:root {
+  --paper: #faf7f2;
+  --card: #fffdf9;
+  --ink: #1c1a17;
+  --ink-soft: #6b6459;
+  --rule: #e6dfd4;
+  --live: #2f6f5e;
+  --spent: #d8d1c6;
+  --focus: #8a6f3f;
+
+  --serif: ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif;
+  --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  padding: 3.5rem 1.25rem 5rem;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  max-width: 46rem;
+  margin: 0 auto;
+}
+
+/* ---------- masthead ---------- */
+
+.masthead { margin-bottom: 2.5rem; }
+
+.masthead h1 {
+  margin: 0 0 .5rem;
+  font-family: var(--serif);
+  font-size: 2rem;
+  font-weight: 400;
+  letter-spacing: .01em;
+}
+
+.lede {
+  margin: 0;
+  max-width: 34rem;
+  color: var(--ink-soft);
+  font-size: .95rem;
+}
+
+/* ---------- total ---------- */
+
+.total {
+  margin: 0 0 1.75rem;
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--ink-soft);
+}
+
+.total:empty { display: none; }
+
+/* ---------- stack ---------- */
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 1.4rem;
+}
+
+.card-name {
+  margin: 0 0 .2rem;
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  font-weight: 400;
+}
+
+.card-meta {
+  margin: 0 0 1.1rem;
+  font-size: .78rem;
+  color: var(--ink-soft);
+}
+
+.card-count {
+  margin: 0 0 .9rem;
+  font-family: var(--serif);
+  font-size: 2.1rem;
+  line-height: 1;
+  letter-spacing: .02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.card-count .unit {
+  font-family: var(--sans);
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--ink-soft);
+  margin-left: .5rem;
+}
+
+/* ---------- the grid ---------- */
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.sq {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  background: var(--live);
+  transition: background-color 150ms ease;
+}
+
+.grid.is-sm .sq { width: 15px; height: 15px; }
+.grid.is-xs .sq { width: 11px; height: 11px; }
+.grid.is-xxs .sq { width: 9px; height: 9px; }
+
+.sq.is-spent {
+  background: var(--spent);
+}
+
+/* ---------- storage note ---------- */
+
+.storage-note {
+  margin: 2.5rem 0 0;
+  font-size: .72rem;
+  color: var(--ink-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sq { transition: none; }
+}
