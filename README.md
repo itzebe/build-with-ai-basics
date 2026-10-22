@@ -87,6 +87,10 @@ The full planning trail lives in `devpost/`.
 - **[`checklist.md`](devpost/checklist.md)** — the six build slices and how each was verified.
 - **[`app-map.html`](devpost/app-map.html)** — a map of the finished code.
 
+`scope.md`, `prd.md` and `spec.md` are also copied to the repository root, because the
+submission rules require those three filenames to be present. The copies in `devpost/`
+are the originals; the root files carry a header saying so.
+
 Built for the Devpost **Build With AI: Basics** hackathon, following that
 curriculum's plan-first workflow.
 
