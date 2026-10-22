@@ -19,7 +19,7 @@ Build mode: fast
   Learner check: Open http://localhost:8000 and look at the card. Does the grid read as "a lot of these left" at a glance, and does the page feel calm rather than like a dashboard?
   Commit: `Add ritual card with remaining-instances grid`
 
-- [ ] **2. You can spend an instance and watch the grid shrink**
+- [x] **2. You can spend an instance and watch the grid shrink**
   Becomes usable: Tapping a square marks it spent, the square changes, and the remaining count drops by one — immediately, in the same redraw.
   Why now: This is the unique kernel from `scope.md`. It goes in as early as the first slice allows, because generic scaffolding around a missing kernel is a failed build. It is also the moment worth getting feedback on.
   PRD ref: `prd.md > Features and Behavior` (Spending an instance), `prd.md > The Core Journey` (step 4)
@@ -92,3 +92,4 @@ Reflection: [offered/answered/declined/already covered — personal answer belon
 Activity mode: [live app and editor, explicit static fallback, focused alternative, prior practice, or recap]
 
 ## Revisions
+- Spent squares are removed from the grid rather than greyed out and disabled — `scope.md > The Unique Kernel` defines the grid *shrinking* as the product, which contradicts `spec.md`'s original "a spent square is disabled" wording. `spec.md > Look and Feel` and `spec.md > Components` were corrected to match the kernel, and `--spent` is now used only for the 150ms leaving transition.

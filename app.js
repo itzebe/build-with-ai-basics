@@ -1,5 +1,5 @@
 /* Finite — some moments run out.
-   State, calculation and rendering. No dependencies, no network. */
+   State, calculation, rendering and persistence. No dependencies, no network. */
 
 var DAYS_PER_PERIOD = { daily: 1, weekly: 7, monthly: 30.4375, yearly: 365.25 };
 var DAYS_PER_UNIT = { days: 1, weeks: 7, months: 30.4375, years: 365.25 };
@@ -39,10 +39,12 @@ function plural(n, word) {
   return n + " " + word + (n === 1 ? "" : "s");
 }
 
-/* "weekly, for 12 years" — plain language, no jargon. */
+var FREQ_WORDS = { daily: "Every day", weekly: "Every week", monthly: "Every month", yearly: "Every year" };
+
+/* "Every week, for 12 years" — plain language, no jargon. */
 function describe(ritual) {
-  var freq = { daily: "Every day", weekly: "Every week", monthly: "Every month", yearly: "Every year" };
-  return freq[ritual.freq] + ", for " + plural(ritual.durationValue, ritual.durationUnit.replace(/s$/, ""));
+  return FREQ_WORDS[ritual.freq] + ", for " +
+    plural(ritual.durationValue, ritual.durationUnit.replace(/s$/, ""));
 }
 
 function seed() {
@@ -80,7 +82,7 @@ function buildCard(ritual) {
   count.textContent = String(left);
   var unit = document.createElement("span");
   unit.className = "unit";
-  unit.textContent = left === 1 ? "left" : "left";
+  unit.textContent = "left";
   count.appendChild(unit);
   card.appendChild(count);
 
@@ -89,10 +91,16 @@ function buildCard(ritual) {
   grid.setAttribute("role", "group");
   grid.setAttribute("aria-label", ritual.name + ": " + left + " of " + ritual.total + " remaining");
 
+  /* One square per moment still to come. The grid is the count. */
   for (var i = 0; i < left; i++) {
-    var sq = document.createElement("span");
+    var sq = document.createElement("button");
+    sq.type = "button";
     sq.className = "sq";
-    if (left === 1) sq.classList.add("is-last");
+    sq.setAttribute("data-id", ritual.id);
+    sq.setAttribute("data-index", String(i));
+    if (i === left - 1) sq.classList.add("is-next");
+    sq.setAttribute("aria-label",
+      "Mark one " + ritual.name + " as used. " + (left - 1) + " would remain.");
     grid.appendChild(sq);
   }
 
@@ -117,8 +125,44 @@ function render() {
     : "";
 }
 
+function findRitual(id) {
+  for (var i = 0; i < rituals.length; i++) {
+    if (rituals[i].id === id) return rituals[i];
+  }
+  return null;
+}
+
+/* Spending is one-way. You do not get a Saturday back.
+   The square fades, then the grid redraws one smaller, so the count and the
+   grid move together and the loss is visible rather than merely stated. */
+function spend(id, square) {
+  var ritual = findRitual(id);
+  if (!ritual || remaining(ritual) <= 0) return;
+
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduced || !square) {
+    ritual.spent += 1;
+    render();
+    return;
+  }
+
+  square.classList.add("is-leaving");
+  square.disabled = true;
+  window.setTimeout(function () {
+    ritual.spent += 1;
+    render();
+  }, 150);
+}
+
+function handleClick(event) {
+  var sq = event.target.closest(".sq");
+  if (!sq || sq.disabled) return;
+  spend(sq.getAttribute("data-id"), sq);
+}
+
 function init() {
   rituals = seed();
+  document.getElementById("stack").addEventListener("click", handleClick);
   render();
 }
 

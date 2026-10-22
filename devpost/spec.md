@@ -87,8 +87,10 @@ Carried forward from `prd.md > Look and Feel` and `scope.md > Inspiration & Iden
 
   Applied as a class on the grid element (`is-sm`, `is-xs`, `is-xxs`) rather than inline styles.
 - **The last square.** When exactly one remains, it keeps the same size but gains a hairline `--ink` border and slightly more weight. It should feel heavier, not alarming — no red, no pulse.
-- **Motion.** Squares transition `background-color 150ms ease` only. Everything else is instant. Wrap the transition in `@media (prefers-reduced-motion: reduce)` and disable it there.
+- **Motion.** Squares transition `background-color` and `transform` over 150ms when leaving. Everything else is instant. Wrap the transition in `@media (prefers-reduced-motion: reduce)` and disable it there, in which case spending re-renders immediately.
 - **Avoided, explicitly.** Emoji, gradients, glassmorphism, drop shadows beyond a hairline, progress rings, streak counters, confetti, stock imagery, purple-to-blue.
+
+Note on `--spent`: because the grid shrinks, a spent square does not persist on screen. The token is used only for the brief leaving transition, so the eye reads the square as *used up* rather than as an error state.
 
 ## Components
 
@@ -131,7 +133,9 @@ One file, three concerns, in this order:
 
 - **Rendering.** `render()` clears `#stack` and rebuilds every card from `rituals`. Rebuilding wholesale rather than diffing is deliberate: the list is tiny, and a full rebuild means the DOM can never disagree with the state.
 
-  Each square is a `<button>` with `data-id` and `data-index`, `aria-pressed` set to whether it is spent, and an `aria-label` like `"Mark Saturday pancakes, instance 4 of 626, as used"`. A spent square is `disabled`.
+  Each square is a `<button>` with `data-id` and `data-index`, and an `aria-label` like `"Mark one Saturday pancakes as used. 625 would remain."` Squares carry no spent state in the DOM: a spent square is removed from the grid entirely, because the grid shrinking *is* the product (`scope.md > The Unique Kernel`). Only squares still to come are rendered.
+
+  Tapping a square adds `.is-leaving` (fading toward `--spent` and scaling to 0.72 over 150ms), disables it against a double-tap, then re-renders with `spent` incremented. Under `prefers-reduced-motion: reduce` the re-render is immediate. The final remaining square carries `.is-next`.
 
 PRD ref: `prd.md > Features and Behavior`, `prd.md > The Core Journey`.
 

@@ -123,15 +123,25 @@ body {
   border: 0;
   border-radius: 3px;
   background: var(--live);
-  transition: background-color 150ms ease;
+  cursor: pointer;
+  transition: background-color 150ms ease, transform 150ms ease;
 }
+
+.sq:hover { background: #26594c; }
 
 .grid.is-sm .sq { width: 15px; height: 15px; }
 .grid.is-xs .sq { width: 11px; height: 11px; }
 .grid.is-xxs .sq { width: 9px; height: 9px; }
 
-.sq.is-spent {
+/* The last one left. Heavier, not alarming: no red, no pulse. */
+.sq.is-next {
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+
+/* Squares leaving: the grid shrinks rather than greying out. */
+.sq.is-leaving {
   background: var(--spent);
+  transform: scale(.72);
 }
 
 /* ---------- storage note ---------- */
