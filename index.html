@@ -19,6 +19,49 @@
 
     <main class="stack" id="stack"></main>
 
+    <form class="add" id="add-form" novalidate>
+      <button type="button" class="add-toggle" id="add-toggle" aria-expanded="false" aria-controls="add-fields">
+        Add a ritual
+      </button>
+
+      <div class="add-fields" id="add-fields" hidden>
+        <div class="field">
+          <label for="f-name">What is it?</label>
+          <input type="text" id="f-name" name="name" autocomplete="off" placeholder="Saturday pancakes">
+          <p class="err" id="e-name" role="alert"></p>
+        </div>
+
+        <div class="field">
+          <label for="f-freq">How often?</label>
+          <select id="f-freq" name="freq">
+            <option value="daily">Every day</option>
+            <option value="weekly" selected>Every week</option>
+            <option value="monthly">Every month</option>
+            <option value="yearly">Every year</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="f-dur">How long does this last?</label>
+          <div class="dur">
+            <input type="number" id="f-dur" name="durationValue" min="1" step="1" value="12" inputmode="numeric">
+            <select id="f-unit" name="durationUnit" aria-label="Duration unit">
+              <option value="days">days</option>
+              <option value="weeks">weeks</option>
+              <option value="months">months</option>
+              <option value="years" selected>years</option>
+            </select>
+          </div>
+          <p class="err" id="e-dur" role="alert"></p>
+        </div>
+
+        <div class="add-actions">
+          <button type="submit" class="btn-primary">Add it</button>
+          <button type="button" class="btn-quiet" id="add-cancel">Cancel</button>
+        </div>
+      </div>
+    </form>
+
     <p class="storage-note" id="storage-note">
       Everything stays in this browser. Clearing site data clears your rituals.
     </p>

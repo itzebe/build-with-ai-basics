@@ -160,9 +160,83 @@ function handleClick(event) {
   spend(sq.getAttribute("data-id"), sq);
 }
 
+/* ---------- adding a ritual ---------- */
+
+function setError(fieldId, message) {
+  document.getElementById(fieldId).textContent = message || "";
+}
+
+function clearErrors() {
+  setError("e-name", "");
+  setError("e-dur", "");
+}
+
+function handleAdd(event) {
+  event.preventDefault();
+  clearErrors();
+
+  var name = document.getElementById("f-name").value.trim();
+  var freq = document.getElementById("f-freq").value;
+  var durationValue = parseInt(document.getElementById("f-dur").value, 10);
+  var durationUnit = document.getElementById("f-unit").value;
+
+  var ok = true;
+
+  if (!name) {
+    setError("e-name", "Give it a name.");
+    ok = false;
+  }
+
+  if (!isFinite(durationValue) || durationValue <= 0) {
+    setError("e-dur", "How long does this last? Enter a number above zero.");
+    ok = false;
+  } else {
+    var total = remainingFrom({ freq: freq, durationValue: durationValue, durationUnit: durationUnit });
+    if (total > MAX_TOTAL) {
+      setError("e-dur", "That works out to " + total.toLocaleString() +
+        " moments — more than this can draw. Try a shorter stretch.");
+      ok = false;
+    }
+  }
+
+  if (!ok) return;
+
+  rituals.push({
+    id: makeId(),
+    name: name,
+    freq: freq,
+    durationValue: durationValue,
+    durationUnit: durationUnit,
+    total: remainingFrom({ freq: freq, durationValue: durationValue, durationUnit: durationUnit }),
+    spent: 0
+  });
+
+  render();
+
+  document.getElementById("f-name").value = "";
+  document.getElementById("f-dur").value = "12";
+  document.getElementById("add-fields").hidden = true;
+  document.getElementById("add-toggle").setAttribute("aria-expanded", "false");
+}
+
 function init() {
   rituals = seed();
   document.getElementById("stack").addEventListener("click", handleClick);
+  document.getElementById("add-form").addEventListener("submit", handleAdd);
+
+  document.getElementById("add-toggle").addEventListener("click", function () {
+    var fields = document.getElementById("add-fields");
+    fields.hidden = !fields.hidden;
+    this.setAttribute("aria-expanded", fields.hidden ? "false" : "true");
+    if (!fields.hidden) document.getElementById("f-name").focus();
+  });
+
+  document.getElementById("add-cancel").addEventListener("click", function () {
+    clearErrors();
+    document.getElementById("add-fields").hidden = true;
+    document.getElementById("add-toggle").setAttribute("aria-expanded", "false");
+  });
+
   render();
 }
 

@@ -29,7 +29,7 @@ Build mode: fast
   Learner check: Tap a few squares and watch the row shrink. Does that land the way you pictured it, or does it need to feel more definite?
   Commit: `Spend an instance by tapping a square`
 
-- [ ] **3. You can add your own ritual**
+- [x] **3. You can add your own ritual**
   Becomes usable: An inline form that takes a name, a frequency and a duration, and adds a new card with a correctly calculated full grid.
   Why now: Until now the only ritual is the seeded example. This is what makes it the user's own app rather than a demo, and the calculation is the one piece of real logic in the project.
   PRD ref: `prd.md > Features and Behavior` (Adding a ritual), `prd.md > States and Boundaries` (invalid input)
