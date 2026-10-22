@@ -100,6 +100,35 @@ square's date; `localStorage` blocked at load still lets the app work for the se
 shows the warning line; contrast of the new meta line is 5.75:1; no console errors, no
 external requests, no 404s; mobile has no overflow and touch marking still works.
 
+## The Demo Video
+
+`finite-demo.mp4` in the repository root. 1 minute 14 seconds, 1280x720, H.264, about
+1.7 MB. Recorded from the running app, not from slides or code.
+
+Built as a silent screen recording with a caption bar, because no narration was recorded.
+The captions carry the explanation. If you would rather have your own voice on it, the shot
+list below is the order to record in and the captions are the points to make in your own
+words.
+
+**Shot list, in order**
+
+1. **Title card** (4s) - the name, the one-line idea, and the three square states.
+2. **First load** (12s) - the app opens on the seeded ritual. The caption points out that the
+   squares pass on their own, which is the idea the whole project rests on.
+3. **Marking** (8s) - tap a passed square, it fills in and the kept count rises; tap again to
+   take it back. This is the one interaction.
+4. **Adding** (15s) - fill the form with a weekly ritual that started years ago. The new card
+   comes back partly in the past, because it started in the past.
+5. **Coming back** (7s) - the marker moves back 30 days and the page reloads. The card says
+   how many moments passed while away, once.
+6. **Keyboard** (7s) - the grid is one tab stop, arrows move inside it, Enter records.
+7. **Phone** (7s) - the same app at 390px wide, tapping a square.
+8. **A finished phase** (6s) - a ritual whose time is up, and recording it anyway.
+9. **End card** (7s) - the repository URL and the three planning docs.
+
+What the video deliberately shows, because it is what a reviewer cannot get from the
+repository alone: the count moving without the user, the return line, and the grid on a phone.
+
 ## Submission Handoff
 
 What is done, and what is the learner's own to finish. None of the items below has been
