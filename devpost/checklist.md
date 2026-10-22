@@ -49,7 +49,7 @@ Build mode: fast
   Learner check: Spend a square, close the browser completely, reopen it and open the page again. Are the spent squares still spent?
   Commit: `Persist rituals and spent instances to localStorage`
 
-- [ ] **5. The grid stays readable, and the last square feels different**
+- [x] **5. The grid stays readable, and the last square feels different**
   Becomes usable: A grid of several hundred squares is still legible and the count stays on screen; a ritual with exactly one instance left reads as notable without looking like an alarm.
   Why now: The seeded example alone is 626 squares, so this is on the critical path for the demo rather than optional polish. The last-square treatment is where the product does its emotional work.
   PRD ref: `prd.md > States and Boundaries` (a ritual with many instances, one instance left), `prd.md > Look and Feel` (the squares)
@@ -59,7 +59,7 @@ Build mode: fast
   Learner check: Spend all but one square of a ritual. Does that last square feel heavier rather than alarming?
   Commit: `Scale the grid by count and weight the final square`
 
-- [ ] **6. A card can finish, and you can remove one**
+- [x] **6. A card can finish, and you can remove one**
   Becomes usable: A ritual whose squares are all spent shows a clear finished state, and any ritual can be removed with a confirmation.
   Why now: Last because it is the completeness pass — it closes the states the PRD names, and it is the only slice that can be cut without damaging the kernel if time runs short.
   PRD ref: `prd.md > Features and Behavior` (Removing a ritual), `prd.md > States and Boundaries` (finished, empty state)

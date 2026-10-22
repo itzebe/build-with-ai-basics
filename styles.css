@@ -144,6 +144,46 @@ body {
   transform: scale(.72);
 }
 
+/* ---------- card states ---------- */
+
+.card.is-finished { border-color: var(--spent); }
+
+.card-finished {
+  margin: .2rem 0 0;
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+}
+
+.card-remove-wrap {
+  margin: 1.1rem 0 0;
+  padding-top: .9rem;
+  border-top: 1px solid var(--rule);
+}
+
+.card-remove {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-soft);
+  font-family: var(--sans);
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  cursor: pointer;
+}
+
+.card-remove:hover { color: #8c3b2e; }
+
+.empty {
+  margin: 0;
+  padding: 2rem 1.4rem;
+  border: 1px dashed var(--rule);
+  border-radius: 6px;
+  color: var(--ink-soft);
+  font-size: .95rem;
+}
+
 /* ---------- add form ---------- */
 
 .add { margin-top: 1.6rem; }

@@ -82,9 +82,20 @@ function buildCard(ritual) {
   count.textContent = String(left);
   var unit = document.createElement("span");
   unit.className = "unit";
-  unit.textContent = "left";
+  unit.textContent = left === 0 ? "all spent" : "left";
   count.appendChild(unit);
   card.appendChild(count);
+
+  /* Every square used up. Say so plainly, offer to remove it. */
+  if (left === 0) {
+    card.classList.add("is-finished");
+    var done = document.createElement("p");
+    done.className = "card-finished";
+    done.textContent = "That is all of them.";
+    card.appendChild(done);
+    card.appendChild(buildRemove(ritual));
+    return card;
+  }
 
   var grid = document.createElement("div");
   grid.className = "grid" + (sizeClassFor(ritual.total) ? " " + sizeClassFor(ritual.total) : "");
@@ -105,12 +116,33 @@ function buildCard(ritual) {
   }
 
   card.appendChild(grid);
+  card.appendChild(buildRemove(ritual));
   return card;
+}
+
+/* Separated from the grid so it cannot be hit by accident. */
+function buildRemove(ritual) {
+  var wrap = document.createElement("p");
+  wrap.className = "card-remove-wrap";
+  var btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "card-remove";
+  btn.setAttribute("data-remove", ritual.id);
+  btn.textContent = "Remove";
+  wrap.appendChild(btn);
+  return wrap;
 }
 
 function render() {
   var stack = document.getElementById("stack");
   stack.textContent = "";
+
+  if (!rituals.length) {
+    var empty = document.createElement("p");
+    empty.className = "empty";
+    empty.textContent = "No rituals yet. Add one, and it will show you how many times it happens before it is over.";
+    stack.appendChild(empty);
+  }
 
   for (var i = 0; i < rituals.length; i++) {
     stack.appendChild(buildCard(rituals[i]));
@@ -156,7 +188,25 @@ function spend(id, square) {
   }, 150);
 }
 
+function removeRitual(id) {
+  var ritual = findRitual(id);
+  if (!ritual) return;
+  if (!window.confirm("Remove \"" + ritual.name + "\"? This cannot be undone.")) return;
+  var next = [];
+  for (var i = 0; i < rituals.length; i++) {
+    if (rituals[i].id !== id) next.push(rituals[i]);
+  }
+  rituals = next;
+  save();
+  render();
+}
+
 function handleClick(event) {
+  var removeBtn = event.target.closest("[data-remove]");
+  if (removeBtn) {
+    removeRitual(removeBtn.getAttribute("data-remove"));
+    return;
+  }
   var sq = event.target.closest(".sq");
   if (!sq || sq.disabled) return;
   spend(sq.getAttribute("data-id"), sq);
