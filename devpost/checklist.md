@@ -72,7 +72,7 @@ Build mode: fast
 ## Hands-on Checkpoints
 
 - [ ] Early usable behavior explored — after slice 2, the kernel
-[-] Persistence confirmed by the learner — after slice 4, closing the browser entirely
+- [ ] Persistence confirmed by the learner — after slice 4, closing the browser entirely
 - [ ] Final kick-the-tires exploration and feedback completed
 
 ## Final Review
