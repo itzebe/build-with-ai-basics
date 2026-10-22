@@ -160,9 +160,12 @@ done on the learner's behalf.
 - [x] Public repository: https://github.com/itzebe/build-with-ai-basics
 - [x] Required planning docs present at the repo root and in `devpost/`.
 - [x] No secrets, no private context, learner profile gitignored and never committed.
-- [ ] Demo video, 1-3 minutes, showing it working end to end.
-- [ ] Learner-written project name, description, and Devpost form fields.
-- [ ] Submit on Devpost.
+- [x] Demo video, 1-3 minutes, showing it working end to end. `finite-demo.mp4` in the
+      repository root, 1:14, with a narrated voiceover. Built with `devpost/render-video.sh`.
+- [x] Submission copy drafted in `devpost/submission.md` — project name, elevator pitch,
+      short description, and the long-form About section, ready to paste into the form.
+- [ ] **Learner's own words in "What we learned"**, and a final read of the draft copy.
+- [ ] Upload the video to the Devpost form, and submit.
 
 ### A suggested recording path
 
