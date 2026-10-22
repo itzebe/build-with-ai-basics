@@ -102,19 +102,32 @@ external requests, no 404s; mobile has no overflow and touch marking still works
 
 ## The Demo Video
 
-`finite-demo.mp4` in the repository root. 1 minute 14 seconds, 1280x720, H.264, about
-1.7 MB. Recorded from the running app, not from slides or code.
+`finite-demo.mp4` in the repository root. 1 minute 14 seconds, 1280x720, H.264 with AAC
+audio, about 2.8 MB. Recorded from the running app, not from slides or code.
 
-Built as a silent screen recording with a caption bar, because no narration was recorded.
-The captions carry the explanation. If you would rather have your own voice on it, the shot
-list below is the order to record in and the captions are the points to make in your own
-words.
+**Voiceover.** The narration is synthetic Nigerian-accented English, generated with
+SpeechT5 fine-tuned on Nigerian-accented recordings (`Ngadou/nigerian_accent_tts_en`). The
+script is in `devpost/voiceover.md`, and the generator is `devpost/voiceover.py`.
+
+Two things worth knowing about that voice, because both were measured rather than assumed:
+
+1. The fine-tune ships no speaker embedding, and SpeechT5 takes its accent mostly from the
+   embedding. So the embeddings are extracted with a SpeechBrain x-vector encoder from the
+   same Nigerian training audio, then L2-normalized to the scale the model expects.
+2. The model cannot pronounce the product name. Across 240 spelling, speaker and seed
+   combinations it produced "Five Nights", "Phoenix", "Fire Nate", "find eights" and
+   "finance", and never "Finite". The narration therefore never says the name; the title
+   card carries it visually. If you record this in your own voice, say the name.
+
+The captions stay on screen with the narration, so the video still works muted or with
+sound off, which is how many reviewers watch. If you would rather use your own voice, the
+shot list below is the order to record in and the script is the points to make.
 
 **Shot list, in order**
 
 1. **Title card** (4s) - the name, the one-line idea, and the three square states.
-2. **First load** (12s) - the app opens on the seeded ritual. The caption points out that the
-   squares pass on their own, which is the idea the whole project rests on.
+2. **First load** (12s) - the app opens on the seeded ritual. The narration points out that
+   the squares pass on their own, which is the idea the whole project rests on.
 3. **Marking** (8s) - tap a passed square, it fills in and the kept count rises; tap again to
    take it back. This is the one interaction.
 4. **Adding** (15s) - fill the form with a weekly ritual that started years ago. The new card
