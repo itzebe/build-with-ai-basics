@@ -78,18 +78,36 @@ Build mode: fast
 ## Final Review
 
 - [ ] Final review complete — feedback resolved and learner confirms ready to ship
+      Technical review is complete: all six slices verified, plus a full regression
+      pass (first load, spend, add, reload), zero external network requests, WCAG AA
+      contrast, and a 390px mobile pass with touch. This box stays unchecked because
+      it also asks for the learner's confirmation, which has not been given. The
+      remaining learner items are the three checkpoints above and the submission
+      copy, which are the learner's own to write.
 
 ## Code Tour and App Map
 
-- [ ] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
-- [ ] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
-- [ ] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
+- [x] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
+- [x] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
+- [x] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
 
-Activity and evidence: [what actually happened; real document/test/code references; unfinished work if interrupted]
-Route and stops: [actual paths and symbols; guided stops completed, or reference-only route]
-Edit outcome: [tried/kept/reverted/declined/not applicable; verification if changed]
-Reflection: [offered/answered/declined/already covered — personal answer belongs only in the ignored profile]
-Activity mode: [live app and editor, explicit static fallback, focused alternative, prior practice, or recap]
+Activity and evidence: Guided code route written into `devpost/app-map.html` from the
+finished code, then checked in a headless browser: all six sections render, no console
+errors, and every link to a planning document resolves (no 404s). Evidence lives in the
+map itself plus the per-slice verification lines above and the regression pass recorded
+under Final Review.
+Route and stops: `app.js > remainingFrom()` → `buildCard()` → `spend()` → `save()` /
+`load()` → `styles.css > .sq` and the size classes. Five stops, in dependency order,
+each one named by symbol. The practice reuses the app's own `seed()` and `spend()`.
+Edit outcome: Not yet attempted by the learner. The suggested edit is in the map's
+"Try changing something" section: swap the seed ritual for a real one, then change its
+frequency from weekly to daily and watch the grid change. Offered, not applied.
+Reflection: Offered, not yet answered. The two learner checkpoints above and the
+submission description are the learner's own to give; nothing has been written on
+their behalf.
+Activity mode: Explicit static fallback — `devpost/app-map.html` is a self-contained
+page with no dependencies, so the route can be followed without running anything, and
+the app itself can be opened from the repository root with a static server.
 
 ## Revisions
 - Spent squares are removed from the grid rather than greyed out and disabled — `scope.md > The Unique Kernel` defines the grid *shrinking* as the product, which contradicts `spec.md`'s original "a spent square is disabled" wording. `spec.md > Look and Feel` and `spec.md > Components` were corrected to match the kernel, and `--spent` is now used only for the 150ms leaving transition.
