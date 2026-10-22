@@ -142,6 +142,7 @@ function spend(id, square) {
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (reduced || !square) {
     ritual.spent += 1;
+    save();
     render();
     return;
   }
@@ -150,6 +151,7 @@ function spend(id, square) {
   square.disabled = true;
   window.setTimeout(function () {
     ritual.spent += 1;
+    save();
     render();
   }, 150);
 }
@@ -158,6 +160,76 @@ function handleClick(event) {
   var sq = event.target.closest(".sq");
   if (!sq || sq.disabled) return;
   spend(sq.getAttribute("data-id"), sq);
+}
+
+/* ---------- persistence ---------- */
+
+var STORAGE_KEY = "finite.rituals.v1";
+var storageOK = true;
+
+/* Each restored ritual is checked for the fields it needs, so a malformed
+   or half-written record is discarded rather than rendered as NaN. */
+function isUsableRitual(r) {
+  return r && typeof r === "object" &&
+    typeof r.name === "string" && r.name.length > 0 &&
+    typeof r.freq === "string" && DAYS_PER_PERIOD[r.freq] !== undefined &&
+    typeof r.durationValue === "number" && isFinite(r.durationValue) && r.durationValue > 0 &&
+    typeof r.durationUnit === "string" && DAYS_PER_UNIT[r.durationUnit] !== undefined &&
+    typeof r.total === "number" && isFinite(r.total) && r.total > 0 &&
+    typeof r.spent === "number" && isFinite(r.spent) && r.spent >= 0;
+}
+
+function save() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(rituals));
+    return true;
+  } catch (err) {
+    storageOK = false;
+    return false;
+  }
+}
+
+function load() {
+  var raw;
+  try {
+    raw = localStorage.getItem(STORAGE_KEY);
+  } catch (err) {
+    storageOK = false;
+    return null;
+  }
+  if (!raw) return null;
+
+  var parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    return null;
+  }
+  if (!Array.isArray(parsed)) return null;
+
+  var clean = [];
+  for (var i = 0; i < parsed.length; i++) {
+    if (isUsableRitual(parsed[i])) {
+      clean.push({
+        id: parsed[i].id || makeId(),
+        name: parsed[i].name,
+        freq: parsed[i].freq,
+        durationValue: parsed[i].durationValue,
+        durationUnit: parsed[i].durationUnit,
+        total: parsed[i].total,
+        spent: Math.min(parsed[i].spent, parsed[i].total),
+        isExample: parsed[i].isExample === true
+      });
+    }
+  }
+  return clean.length ? clean : null;
+}
+
+/* If the browser will not keep anything, say so once rather than pretending. */
+function noteIfStorageUnavailable() {
+  if (storageOK) return;
+  var note = document.getElementById("storage-note");
+  note.textContent = "This browser is not keeping data right now, so your rituals will not be here next time.";
 }
 
 /* ---------- adding a ritual ---------- */
@@ -211,6 +283,7 @@ function handleAdd(event) {
     spent: 0
   });
 
+  save();
   render();
 
   document.getElementById("f-name").value = "";
@@ -220,7 +293,15 @@ function handleAdd(event) {
 }
 
 function init() {
-  rituals = seed();
+  var stored = load();
+  if (stored) {
+    rituals = stored;
+  } else {
+    rituals = seed();
+    save();
+  }
+  noteIfStorageUnavailable();
+
   document.getElementById("stack").addEventListener("click", handleClick);
   document.getElementById("add-form").addEventListener("submit", handleAdd);
 

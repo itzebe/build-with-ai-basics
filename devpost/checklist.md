@@ -39,7 +39,7 @@ Build mode: fast
   Learner check: Add a ritual that is actually yours — a real one, with a real frequency. Does the number it gives you feel right?
   Commit: `Add a ritual from an inline form`
 
-- [ ] **4. Rituals survive closing the tab**
+- [x] **4. Rituals survive closing the tab**
   Becomes usable: Rituals and their spent squares are still there when the page is reopened, including after the browser is fully closed.
   Why now: This is the learner's identified uncertainty in `spec.md > Decisions and Open Issues` — the one load-bearing assumption in the design. Finding out now, while the change is small, is much cheaper than discovering it during a recording.
   PRD ref: `prd.md > States and Boundaries` (persistence, boundaries)
@@ -72,7 +72,7 @@ Build mode: fast
 ## Hands-on Checkpoints
 
 - [ ] Early usable behavior explored — after slice 2, the kernel
-- [ ] Persistence confirmed by the learner — after slice 4, closing the browser entirely
+[-] Persistence confirmed by the learner — after slice 4, closing the browser entirely
 - [ ] Final kick-the-tires exploration and feedback completed
 
 ## Final Review
