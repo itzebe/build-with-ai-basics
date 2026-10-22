@@ -14,9 +14,13 @@ SRC=${1:-finite-demo-silent.mp4}
 python3 devpost/voiceover.py          # writes out/*.wav
 python3 devpost/voiceover-mux.py      # writes narration.wav
 
+# Re-encode rather than copy: GitHub will not preview a file this big inline.
+# At -c:v copy the result was 2.68 MB and github.com showed
+# "we can't show files that are this big right now" instead of a player.
 "$FF" -y -i "$SRC" -i narration.wav \
   -map 0:v:0 -map 1:a:0 \
-  -c:v copy -c:a aac -b:a 160k -ar 48000 \
+  -c:v libx264 -preset veryslow -crf 28 -pix_fmt yuv420p \
+  -c:a aac -b:a 64k -ac 1 -ar 48000 \
   -movflags +faststart -shortest \
   finite-demo.mp4 -loglevel error
 
@@ -32,5 +36,8 @@ while i < len(d) - 8:
     if t in ("moov","trak","mdia","minf","stbl"): i += 8; continue
     i += s
 assert order.index("moov") < order.index("mdat"), "moov after mdat: will not stream"
-print("faststart OK:", order[:4])
+import os
+mb = os.path.getsize("finite-demo.mp4") / 1048576
+assert mb < 2.0, f"{mb:.2f} MB is too big for GitHub to preview inline"
+print(f"faststart OK: {order[:4]}  size {mb:.2f} MB")
 PY

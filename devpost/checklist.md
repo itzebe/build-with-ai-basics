@@ -103,7 +103,14 @@ external requests, no 404s; mobile has no overflow and touch marking still works
 ## The Demo Video
 
 `finite-demo.mp4` in the repository root. 1 minute 14 seconds, 1280x720, H.264 with AAC
-audio, about 2.8 MB. Recorded from the running app, not from slides or code.
+audio, 1.27 MB. Recorded from the running app, not from slides or code.
+
+Two things about the file itself, both of which broke playback before they were fixed.
+GitHub will not preview a video inline above roughly 2 MB, and it says so only on the file
+page: "we can't show files that are this big right now". The first export was 2.68 MB, so
+the video downloaded fine but would not play on github.com. It is re-encoded at crf 28 now.
+The `moov` atom must also come before `mdat`, or a browser fetches the whole file before it
+starts. `devpost/render-video.sh` asserts both, so neither can regress.
 
 **Voiceover.** The narration is synthetic Nigerian-accented English, generated with
 SpeechT5 fine-tuned on Nigerian-accented recordings (`Ngadou/nigerian_accent_tts_en`). The
