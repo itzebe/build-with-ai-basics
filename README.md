@@ -17,8 +17,26 @@ count goes up. Tap it again to take it back; it is a note about the past, not th
 moment itself. The number is easy to ignore, but a grid you can watch run out is not.
 
 And when you come back after a while, the app tells you what changed while you were
-gone: *"4 moments passed since you last looked."* No other app says that. It is the
+gone: *"4 moments passed since you last looked."* Few apps tell you this. It is the
 reason to open it again.
+
+## Watch the demo
+
+**Public demo video: <https://youtu.be/UTpCysSPDdo>** — 1 minute 14 seconds, narrated, with
+the captions kept on screen so it also works muted.
+
+The same recording is committed as [`finite-demo.mp4`](finite-demo.mp4) in the repository
+root, if you would rather not open YouTube.
+
+It is a screen recording of the running app, not slides or code. Among the things it shows:
+the grid already partly elapsed on first load, marking a passed square and taking it back,
+adding a ritual that started years ago, the line about what passed while you were away, the
+grid driven from the keyboard, the same app on a phone, and a ritual whose phase is over.
+The full shot list and the script are in [`devpost/checklist.md`](devpost/checklist.md) and
+[`devpost/voiceover.md`](devpost/voiceover.md).
+
+> The YouTube link above is the one to use in the Devpost form. GitHub will not preview a
+> video above roughly 2 MB, so the committed file is encoded to stay under that.
 
 ## Who it is for
 
@@ -48,7 +66,7 @@ treat `file://` pages inconsistently and some will not save anything on that ori
 
 ## How it is built
 
-Three files.
+Four files.
 
 | File | What it does |
 |---|---|
@@ -88,9 +106,12 @@ day. Month ends are clamped too, so starting on 31 January gives 31 Jan → 28 F
 
 **Nothing about the present is stored.** Only the start date, the count, which
 occurrences you marked, and the day you last opened the app. The passed/upcoming split
-is recomputed from your device's clock every time the page is drawn. That is why the
-grid can never be quietly out of date, and why there is no timer or background process
-anywhere in the app.
+is recomputed from your device's clock every time the page is drawn. There is no polling
+and no scheduled background task anywhere in the app: the timeline is not maintained in
+the background, it is recalculated whenever the page renders. That is why the grid can
+never be quietly out of date. (The only timer in the codebase is a 150 ms `setTimeout`
+that delays a re-render so the marking animation can play, and it is skipped entirely
+when the user prefers reduced motion.)
 
 The one stored date is `lastSeenISO`. It exists so the app can count what fell between
 your last visit and now, and then it moves forward. The count itself is never stored —
@@ -107,10 +128,40 @@ let it go stale in exactly the way the old counter did.
 3. Tap a quiet square if you were there for it. Tap again to undo.
 4. Use **Add a ritual** for your own: a name, how often, how long it lasts, and when
    it started.
-5. Come back next week. Your kept marks are still there, one more square has gone quiet
+5. Each card has a quiet **Remove** control underneath the grid. It asks for confirmation
+   before deleting, and removal cannot be undone.
+6. Come back next week. Your kept marks are still there, one more square has gone quiet
    on its own, and the card says how many moments slipped by.
 
 You cannot mark a square that has not happened yet. There is nothing to record.
+
+## Accessibility
+
+The grid is the whole interface, so most of the work went into making it usable without a
+mouse. What is implemented, and what was measured:
+
+- **Keyboard navigation.** A grid is a single Tab stop. Arrow keys move between squares,
+  `Home` and `End` jump to the first and last actionable square, and Up/Down move by a
+  visual row rather than one square. Focus is clamped to squares that can actually be
+  acted on — a disabled button cannot take focus, so aiming at one would silently do
+  nothing.
+- **A grid with nothing actionable takes no Tab stop at all**, rather than parking focus
+  on a button nobody can use.
+- **Labels and semantics.** Each grid is a `role="group"` with a label giving the ritual
+  name, how many are still to come, and how many are kept. Every square carries its own
+  label with its date and state, so a screen reader announces, for example, "Sunday 12
+  April 2026, passed. Not marked. Tap to record you were there." The total is an
+  `aria-live="polite"` region, and the add-form toggle exposes `aria-expanded`.
+- **Reduced motion is respected.** The marking animation is skipped when the user's system
+  asks for reduced motion, and `styles.css` has a matching `prefers-reduced-motion` block.
+- **Measured contrast**, against the card background: upcoming squares 5.81:1, kept squares
+  9.16:1, and passed-versus-upcoming 4.13:1. Body text meets WCAG AA. The passed fill is
+  deliberately low at 1.41:1 — it is meant to recede — and carries a hairline edge at
+  3.15:1 so it stays visible on a projector. That is a design decision, not an oversight.
+
+The measured figures and the full verification pass are recorded in
+[`devpost/checklist.md`](devpost/checklist.md). No complete WCAG conformance evaluation has
+been carried out, so this is not a claim of full AA conformance across the app.
 
 ## What was built and why
 

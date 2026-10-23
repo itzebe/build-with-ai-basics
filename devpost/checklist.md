@@ -103,7 +103,8 @@ external requests, no 404s; mobile has no overflow and touch marking still works
 ## The Demo Video
 
 `finite-demo.mp4` in the repository root. 1 minute 14 seconds, 1280x720, H.264 with AAC
-audio, 1.27 MB. Recorded from the running app, not from slides or code.
+audio, 1.27 MB. Recorded from the running app, not from slides or code. The same recording
+is publicly available at https://youtu.be/UTpCysSPDdo, which is the URL for the Devpost form.
 
 Two things about the file itself, both of which broke playback before they were fixed.
 GitHub will not preview a video inline above roughly 2 MB, and it says so only on the file
@@ -154,18 +155,19 @@ repository alone: the count moving without the user, the return line, and the gr
 What is done, and what is the learner's own to finish. None of the items below has been
 done on the learner's behalf.
 
-- [x] App complete and verified; live at
-      https://work-1-yrluinyyypugxots.prod-runtime.all-hands.dev/ (a sandbox URL, so the
-      video is the durable artefact).
+- [x] App complete and verified; live at https://build-with-ai-basics.vercel.app (a
+      permanent Vercel deployment serving the committed `index.html` and `app.js`; the
+      video is still the primary artefact for reviewers).
 - [x] Public repository: https://github.com/itzebe/build-with-ai-basics
 - [x] Required planning docs present at the repo root and in `devpost/`.
 - [x] No secrets, no private context, learner profile gitignored and never committed.
 - [x] Demo video, 1-3 minutes, showing it working end to end. `finite-demo.mp4` in the
       repository root, 1:14, with a narrated voiceover. Built with `devpost/render-video.sh`.
+      Publicly available at https://youtu.be/UTpCysSPDdo, which is the link for the form.
 - [x] Submission copy drafted in `devpost/submission.md` — project name, elevator pitch,
       short description, and the long-form About section, ready to paste into the form.
 - [ ] **Learner's own words in "What we learned"**, and a final read of the draft copy.
-- [ ] Upload the video to the Devpost form, and submit.
+- [ ] Submit on Devpost, entering https://youtu.be/UTpCysSPDdo as the public video URL.
 
 ### A suggested recording path
 

@@ -32,12 +32,17 @@ The grid is not a report on your discipline. It moves on its own, so the number 
 | Field | Value |
 |---|---|
 | Repository | `https://github.com/itzebe/build-with-ai-basics` |
-| Live demo | `https://work-1-yrluinyyypugxots.prod-runtime.all-hands.dev/` |
-| Demo video | `finite-demo.mp4` in the repository root — `https://github.com/itzebe/build-with-ai-basics/blob/main/finite-demo.mp4` |
+| Live demo | `https://build-with-ai-basics.vercel.app` |
+| Demo video (public) | `https://youtu.be/UTpCysSPDdo` |
+| Demo video (committed copy) | `finite-demo.mp4` in the repository root — `https://github.com/itzebe/build-with-ai-basics/blob/main/finite-demo.mp4` |
 
-> **The live link is temporary.** It is a sandbox URL that stops working when the session
-> ends. Put it in the form if the form asks, but do not rely on reviewers reaching it. The
-> video is the durable artefact and the repository runs with `python3 -m http.server`.
+> **The live demo is permanent.** It is deployed on Vercel and serves the same committed
+> `index.html` and `app.js`. Verified 2026-10-22: HTTP 200, title "Finite — how many moments
+> are left", all three assets reachable.
+>
+> **The video link to enter in the Devpost form is `https://youtu.be/UTpCysSPDdo`.** The
+> committed `finite-demo.mp4` is the same recording, kept in the repository so the source is
+> self-contained; the public video is the one the form asks for.
 
 ---
 
@@ -116,8 +121,11 @@ ends clamped (31 Jan → 28 Feb → 31 Mar, not a march into the wrong month).
 
 **Nothing about the present is stored.** Only the start date, the count, which occurrences you
 marked, and the day you last opened the app. The passed/upcoming split is recomputed from the
-device clock every time the page is drawn — which is why the grid can never be quietly out of
-date, and why there is no timer or background process anywhere in the app.
+device clock every time the page is drawn. There is no polling and no scheduled background
+task anywhere in the app: the timeline is not maintained in the background, it is recalculated
+whenever the page renders, which is why the grid can never be quietly out of date. (The only
+timer in the codebase is a 150 ms `setTimeout` that delays a re-render so the marking
+animation can play, and it is skipped entirely when the user prefers reduced motion.)
 
 Built for this hackathon by running the **Build With AI: Basics** skills in an AI coding
 agent — `1-start`, `2-scope`, `3-prd`, `4-spec`, `5-build`, `6-ship`, pinned in
@@ -207,9 +215,12 @@ turn a reflection tool into a source of guilt.
       narration voice in the video, which is why the video shows it on the title card and never
       says it. If you rename the project, the video stays correct; if you keep the name, that is
       worth knowing.
-- [ ] **Upload the video to the Devpost form or YouTube.** GitHub will not play it inside the
-      Devpost submission, and reviewers will not clone the repo.
+- [ ] **Enter the public video URL in the Devpost form.** The rules require the video to be
+      publicly visible on **YouTube or Vimeo**, and the link entered on the submission form.
+      It is `https://youtu.be/UTpCysSPDdo`. GitHub will not play the file inside the Devpost
+      submission, and reviewers will not clone the repo.
 - [ ] **Confirm the repo is public** — it is, verified.
 - [ ] **Confirm `scope.md`, `prd.md`, `spec.md` are at the repository root** — they are, verified.
-- [ ] **Decide about the live link.** It is a sandbox URL and will die. Include it only if the
-      form demands a live URL, and know that the video is what reviewers will actually use.
+- [ ] **Decide about the live link.** It is now a permanent Vercel deployment
+      (`https://build-with-ai-basics.vercel.app`), so it is safe to include. The video is
+      still what most reviewers will actually use.
